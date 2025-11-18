@@ -4,18 +4,26 @@
 
 @layer base {
   body {
-    @apply text-gray-900;
+    @apply text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-900;
+  }
+  
+  html {
+    @apply scroll-smooth;
   }
 }
 
 @layer components {
-  /* Glassmorphism Effect */
+  /* Glassmorphism Effects */
   .glass {
-    @apply bg-white/70 backdrop-blur-lg border border-white/20;
+    @apply bg-white/70 backdrop-blur-lg border border-white/20 dark:bg-slate-800/70 dark:border-slate-700/30;
   }
   
   .glass-dark {
-    @apply bg-gray-900/70 backdrop-blur-lg border border-white/10;
+    @apply bg-slate-900/70 backdrop-blur-lg border border-slate-700/30;
+  }
+
+  .glass-card {
+    @apply bg-white/80 dark:bg-slate-800/60 backdrop-blur-xl border border-gray-200/50 dark:border-slate-700/50 rounded-2xl shadow-card dark:shadow-card-dark;
   }
 
   /* Gradient Text */
@@ -23,31 +31,47 @@
     @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-500 to-secondary-500;
   }
 
+  .gradient-text-teal {
+    @apply bg-clip-text text-transparent bg-gradient-primary;
+  }
+
   /* Modern Button Styles */
   .btn-primary {
-    @apply px-6 py-3 bg-gradient-primary text-white rounded-xl font-medium shadow-lg hover:shadow-glow transition-all duration-300 hover:scale-105;
+    @apply px-6 py-3 bg-gradient-primary text-white rounded-xl font-medium shadow-lg hover:shadow-glow transition-all duration-300 hover:scale-105 active:scale-100;
   }
 
   .btn-secondary {
-    @apply px-6 py-3 bg-white text-primary-600 rounded-xl font-medium shadow-card hover:shadow-card-hover transition-all duration-300 border border-primary-200;
+    @apply px-6 py-3 glass text-primary-600 dark:text-primary-400 rounded-xl font-medium shadow-card hover:shadow-card-hover dark:shadow-card-dark dark:hover:shadow-card-dark-hover transition-all duration-300 hover:scale-[1.02] active:scale-100;
   }
 
   .btn-ghost {
-    @apply px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-all duration-300;
+    @apply px-6 py-3 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-slate-700 transition-all duration-300;
   }
 
-  /* Modern Card */
+  .btn-danger {
+    @apply px-6 py-3 bg-red-500 text-white rounded-xl font-medium shadow-lg hover:bg-red-600 transition-all duration-300 hover:scale-105 active:scale-100;
+  }
+
+  /* Modern Cards */
   .card {
-    @apply bg-white rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 border border-gray-100;
+    @apply bg-white dark:bg-slate-800 rounded-2xl shadow-card dark:shadow-card-dark hover:shadow-card-hover dark:hover:shadow-card-dark-hover transition-all duration-300 border border-gray-100 dark:border-slate-700;
   }
 
   .card-glass {
-    @apply glass rounded-2xl shadow-glass transition-all duration-300;
+    @apply glass-card transition-all duration-300 hover:scale-[1.02];
+  }
+
+  .card-interactive {
+    @apply card cursor-pointer hover:scale-[1.02] active:scale-[0.98];
   }
 
   /* Input Styles */
   .input-modern {
-    @apply w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 outline-none;
+    @apply w-full px-4 py-3 border-2 border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500;
+  }
+
+  .input-glass {
+    @apply w-full px-4 py-3 glass rounded-xl focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 transition-all duration-200 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500;
   }
 
   /* Badge Styles */
@@ -55,9 +79,52 @@
     @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
   }
 
+  .badge-success {
+    @apply badge bg-secondary-100 dark:bg-secondary-900/30 text-secondary-800 dark:text-secondary-300 border border-secondary-200 dark:border-secondary-800;
+  }
+
+  .badge-warning {
+    @apply badge bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800;
+  }
+
+  .badge-danger {
+    @apply badge bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-800;
+  }
+
+  .badge-info {
+    @apply badge bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 border border-primary-200 dark:border-primary-800;
+  }
+
+  /* Toast Notification */
+  .toast {
+    @apply glass-card px-6 py-4 shadow-glass-dark min-w-[280px] max-w-md;
+  }
+
   /* Smooth Transitions */
   .transition-smooth {
     @apply transition-all duration-300 ease-in-out;
+  }
+
+  /* Score Display */
+  .score-display {
+    @apply text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent;
+  }
+
+  /* Hole Tab */
+  .hole-tab {
+    @apply px-4 py-2 rounded-xl font-medium transition-all duration-200 min-w-[60px] text-center;
+  }
+
+  .hole-tab-active {
+    @apply hole-tab bg-gradient-primary text-white shadow-glow scale-105;
+  }
+
+  .hole-tab-inactive {
+    @apply hole-tab glass text-gray-700 dark:text-gray-300 hover:scale-105;
+  }
+
+  .hole-tab-completed {
+    @apply hole-tab glass text-primary-600 dark:text-primary-400 border-2 border-primary-500 dark:border-primary-400;
   }
 }
 
@@ -75,13 +142,13 @@
     inset: 0;
     border-radius: inherit;
     padding: 2px;
-    background: linear-gradient(135deg, #0ea5e9, #a855f7);
+    background: linear-gradient(135deg, #14b8a6, #22c55e);
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
   }
 
-  /* Scrollbar Styles */
+  /* Custom Scrollbar */
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
@@ -89,6 +156,28 @@
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-track {
+    @apply bg-gray-100 dark:bg-slate-800 rounded-full;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 dark:bg-slate-600 rounded-full hover:bg-gray-400 dark:hover:bg-slate-500;
+  }
+
+  /* Text Shadow for better readability */
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .text-shadow-lg {
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   }
 }
 

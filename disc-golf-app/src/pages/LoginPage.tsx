@@ -61,18 +61,18 @@ const LoginPage = () => {
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-primary rounded-2xl shadow-glow mb-4 animate-bounce-subtle">
             <Disc3 className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-4xl font-bold gradient-text mb-2">Disc Golf Pro</h1>
-          <p className="text-gray-600">Elevate your disc golf experience</p>
+          <h1 className="text-4xl font-bold gradient-text-teal mb-2">Disc Golf Pro</h1>
+          <p className="text-gray-600 dark:text-gray-400">Elevate your disc golf experience</p>
         </div>
 
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="email" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Email Address
             </label>
             <div className="relative">
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
                 <Mail className="w-5 h-5" />
               </div>
               <input
@@ -88,11 +88,11 @@ const LoginPage = () => {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="password" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Password
             </label>
             <div className="relative">
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
                 <Lock className="w-5 h-5" />
               </div>
               <input
@@ -108,7 +108,7 @@ const LoginPage = () => {
           </div>
 
           {error && (
-            <div className="bg-red-50 border-2 border-red-200 text-red-700 p-4 rounded-xl text-sm font-medium flex items-center space-x-2 animate-slide-down">
+            <div className="bg-red-50 dark:bg-red-900/30 border-2 border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 p-4 rounded-xl text-sm font-medium flex items-center space-x-2 animate-slide-down">
               <span>⚠️</span>
               <span>{error}</span>
             </div>
@@ -124,11 +124,11 @@ const LoginPage = () => {
         </form>
 
         {/* Quick Login Section */}
-        <div className="mt-8 pt-8 border-t border-gray-200">
+        <div className="mt-8 pt-8 border-t border-gray-200 dark:border-slate-700">
           <div className="flex items-center justify-center space-x-2 mb-4">
-            <div className="h-px flex-1 bg-gradient-to-r from-transparent to-gray-300"></div>
-            <p className="text-sm font-semibold text-gray-600">Quick Demo Login</p>
-            <div className="h-px flex-1 bg-gradient-to-l from-transparent to-gray-300"></div>
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent to-gray-300 dark:to-slate-600"></div>
+            <p className="text-sm font-semibold text-gray-600 dark:text-gray-400">Quick Demo Login</p>
+            <div className="h-px flex-1 bg-gradient-to-l from-transparent to-gray-300 dark:to-slate-600"></div>
           </div>
           
           <div className="grid grid-cols-2 gap-3">
@@ -136,7 +136,7 @@ const LoginPage = () => {
               <button
                 key={user.id}
                 onClick={() => quickLogin(user.email)}
-                className="group relative overflow-hidden bg-white hover:bg-gray-50 border-2 border-gray-200 hover:border-primary-300 rounded-xl p-3 transition-all hover:scale-105 hover:shadow-lg"
+                className="group relative overflow-hidden bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 border-2 border-gray-200 dark:border-slate-700 hover:border-primary-300 dark:hover:border-primary-600 rounded-xl p-3 transition-all hover:scale-105 hover:shadow-lg"
               >
                 <div className={`absolute top-0 right-0 w-8 h-8 bg-gradient-to-br ${getRoleColor(user.role)} opacity-20 rounded-bl-xl`}></div>
                 <div className="relative">
@@ -144,16 +144,16 @@ const LoginPage = () => {
                     <div className={`p-1 bg-gradient-to-r ${getRoleColor(user.role)} text-white rounded`}>
                       {getRoleIcon(user.role)}
                     </div>
-                    <div className="text-xs font-bold text-gray-800 truncate">{user.name}</div>
+                    <div className="text-xs font-bold text-gray-800 dark:text-gray-200 truncate">{user.name}</div>
                   </div>
-                  <div className="text-xs text-gray-500 capitalize">{user.role.replace('_', ' ')}</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 capitalize">{user.role.replace('_', ' ')}</div>
                 </div>
               </button>
             ))}
           </div>
           
-          <div className="mt-4 p-3 bg-primary-50 rounded-xl border border-primary-200">
-            <p className="text-xs text-primary-700 text-center font-medium">
+          <div className="mt-4 p-3 bg-primary-50 dark:bg-primary-900/30 rounded-xl border border-primary-200 dark:border-primary-800">
+            <p className="text-xs text-primary-700 dark:text-primary-300 text-center font-medium">
               💡 Click any user to quick login • Any password works for demo
             </p>
           </div>

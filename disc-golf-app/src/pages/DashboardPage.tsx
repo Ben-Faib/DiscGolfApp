@@ -53,63 +53,63 @@ const DashboardPage = () => {
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="card group hover:scale-105 p-6 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-primary-100 rounded-full blur-3xl -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-primary-100 dark:bg-primary-900/50 rounded-full blur-3xl -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform"></div>
           <div className="relative">
             <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-primary-100 rounded-xl">
-                <Calendar className="w-6 h-6 text-primary-600" />
+              <div className="p-3 bg-primary-100 dark:bg-primary-900/30 rounded-xl">
+                <Calendar className="w-6 h-6 text-primary-600 dark:text-primary-400" />
               </div>
-              <div className="text-3xl font-bold text-gray-900">{userEvents.length}</div>
+              <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">{userEvents.length}</div>
             </div>
-            <div className="text-sm font-medium text-gray-600">Upcoming Events</div>
-            <div className="mt-2 text-xs text-primary-600 font-semibold">VIEW ALL →</div>
+            <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Upcoming Events</div>
+            <div className="mt-2 text-xs text-primary-600 dark:text-primary-400 font-semibold">VIEW ALL →</div>
           </div>
         </div>
 
         <div className="card group hover:scale-105 p-6 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-accent-100 rounded-full blur-3xl -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-accent-100 dark:bg-accent-900/50 rounded-full blur-3xl -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform"></div>
           <div className="relative">
             <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-accent-100 rounded-xl">
-                <Users className="w-6 h-6 text-accent-600" />
+              <div className="p-3 bg-accent-100 dark:bg-accent-900/30 rounded-xl">
+                <Users className="w-6 h-6 text-accent-600 dark:text-accent-400" />
               </div>
-              <div className="text-3xl font-bold text-gray-900">{myGroups.length}</div>
+              <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">{myGroups.length}</div>
             </div>
-            <div className="text-sm font-medium text-gray-600">My Groups</div>
-            <div className="mt-2 text-xs text-accent-600 font-semibold">MANAGE →</div>
+            <div className="text-sm font-medium text-gray-600 dark:text-gray-400">My Groups</div>
+            <div className="mt-2 text-xs text-accent-600 dark:text-accent-400 font-semibold">MANAGE →</div>
           </div>
         </div>
 
         <div className="card group hover:scale-105 p-6 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-secondary-100 rounded-full blur-3xl -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-secondary-100 dark:bg-secondary-900/50 rounded-full blur-3xl -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform"></div>
           <div className="relative">
             <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-secondary-100 rounded-xl">
-                <TrendingUp className="w-6 h-6 text-secondary-600" />
+              <div className="p-3 bg-secondary-100 dark:bg-secondary-900/30 rounded-xl">
+                <TrendingUp className="w-6 h-6 text-secondary-600 dark:text-secondary-400" />
               </div>
-              <div className="text-3xl font-bold text-gray-900">{myStats?.averageScore || 'N/A'}</div>
+              <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">{myStats?.averageScore || 'N/A'}</div>
             </div>
-            <div className="text-sm font-medium text-gray-600">Average Score</div>
-            <div className="mt-2 text-xs text-secondary-600 font-semibold">SEE STATS →</div>
+            <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Average Score</div>
+            <div className="mt-2 text-xs text-secondary-600 dark:text-secondary-400 font-semibold">SEE STATS →</div>
           </div>
         </div>
 
         <div className="card group hover:scale-105 p-6 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-orange-100 rounded-full blur-3xl -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-orange-100 dark:bg-orange-900/50 rounded-full blur-3xl -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform"></div>
           <div className="relative">
             <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-orange-100 rounded-xl relative">
-                <Bell className="w-6 h-6 text-orange-600" />
+              <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-xl relative">
+                <Bell className="w-6 h-6 text-orange-600 dark:text-orange-400" />
                 {unreadNotifications.length > 0 && (
                   <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-red-500 to-pink-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
                     {unreadNotifications.length}
                   </div>
                 )}
               </div>
-              <div className="text-3xl font-bold text-gray-900">{unreadNotifications.length}</div>
+              <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">{unreadNotifications.length}</div>
             </div>
-            <div className="text-sm font-medium text-gray-600">New Notifications</div>
-            <div className="mt-2 text-xs text-orange-600 font-semibold">CHECK NOW →</div>
+            <div className="text-sm font-medium text-gray-600 dark:text-gray-400">New Notifications</div>
+            <div className="mt-2 text-xs text-orange-600 dark:text-orange-400 font-semibold">CHECK NOW →</div>
           </div>
         </div>
       </div>
@@ -118,15 +118,15 @@ const DashboardPage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Upcoming Events */}
         <div className="card">
-          <div className="p-6 border-b border-gray-100">
+          <div className="p-6 border-b border-gray-100 dark:border-slate-700">
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-3">
-                <div className="p-2 bg-primary-100 rounded-lg">
-                  <Calendar className="w-5 h-5 text-primary-600" />
+                <div className="p-2 bg-primary-100 dark:bg-primary-900/30 rounded-lg">
+                  <Calendar className="w-5 h-5 text-primary-600 dark:text-primary-400" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-900">My Upcoming Events</h2>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">My Upcoming Events</h2>
               </div>
-              <Link to="/events" className="flex items-center space-x-1 text-primary-600 hover:text-primary-700 text-sm font-medium group">
+              <Link to="/events" className="flex items-center space-x-1 text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-sm font-medium group">
                 <span>View All</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
@@ -136,18 +136,18 @@ const DashboardPage = () => {
             {userEvents.length > 0 ? (
               <div className="space-y-3">
                 {userEvents.slice(0, 3).map(event => (
-                  <div key={event.id} className="group p-4 rounded-xl border-2 border-primary-100 hover:border-primary-300 hover:bg-primary-50/50 transition-all">
+                  <div key={event.id} className="group p-4 rounded-xl border-2 border-primary-100 dark:border-primary-900/50 hover:border-primary-300 dark:hover:border-primary-700 hover:bg-primary-50/50 dark:hover:bg-primary-900/20 transition-all">
                     <div className="flex items-start space-x-3">
                       <div className="p-2 bg-gradient-primary rounded-lg shadow-glow shrink-0">
                         <Target className="w-5 h-5 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-gray-900 group-hover:text-primary-600 transition-colors">{event.name}</h3>
-                        <div className="flex items-center space-x-2 text-sm text-gray-600 mt-1">
+                        <h3 className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{event.name}</h3>
+                        <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 mt-1">
                           <MapPin className="w-4 h-4" />
                           <span className="truncate">{event.location}</span>
                         </div>
-                        <div className="flex items-center space-x-2 text-xs text-gray-500 mt-1">
+                        <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-500 mt-1">
                           <Clock className="w-3 h-3" />
                           <span>{new Date(event.date).toLocaleDateString()} at {event.time}</span>
                         </div>
@@ -158,11 +158,11 @@ const DashboardPage = () => {
               </div>
             ) : (
               <div className="text-center py-12">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
-                  <Calendar className="w-8 h-8 text-gray-400" />
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 dark:bg-slate-800 rounded-full mb-4">
+                  <Calendar className="w-8 h-8 text-gray-400 dark:text-gray-600" />
                 </div>
-                <p className="text-gray-500 mb-2">No upcoming events</p>
-                <Link to="/events" className="text-primary-600 hover:text-primary-700 font-medium text-sm">
+                <p className="text-gray-500 dark:text-gray-400 mb-2">No upcoming events</p>
+                <Link to="/events" className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium text-sm">
                   Browse Events →
                 </Link>
               </div>
@@ -172,15 +172,15 @@ const DashboardPage = () => {
 
         {/* My Groups */}
         <div className="card">
-          <div className="p-6 border-b border-gray-100">
+          <div className="p-6 border-b border-gray-100 dark:border-slate-700">
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-3">
-                <div className="p-2 bg-accent-100 rounded-lg">
-                  <Users className="w-5 h-5 text-accent-600" />
+                <div className="p-2 bg-accent-100 dark:bg-accent-900/30 rounded-lg">
+                  <Users className="w-5 h-5 text-accent-600 dark:text-accent-400" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-900">My Groups</h2>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">My Groups</h2>
               </div>
-              <Link to="/groups" className="flex items-center space-x-1 text-accent-600 hover:text-accent-700 text-sm font-medium group">
+              <Link to="/groups" className="flex items-center space-x-1 text-accent-600 dark:text-accent-400 hover:text-accent-700 dark:hover:text-accent-300 text-sm font-medium group">
                 <span>View All</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
@@ -192,15 +192,15 @@ const DashboardPage = () => {
                 {myGroups.slice(0, 3).map(group => {
                   const owner = getUserById(group.ownerId);
                   return (
-                    <div key={group.id} className="group p-4 rounded-xl border-2 border-accent-100 hover:border-accent-300 hover:bg-accent-50/50 transition-all">
+                    <div key={group.id} className="group p-4 rounded-xl border-2 border-accent-100 dark:border-accent-900/50 hover:border-accent-300 dark:hover:border-accent-700 hover:bg-accent-50/50 dark:hover:bg-accent-900/20 transition-all">
                       <div className="flex items-start space-x-3">
                         <div className="p-2 bg-gradient-accent rounded-lg shadow-glow-green shrink-0">
                           <Users className="w-5 h-5 text-white" />
                         </div>
                         <div className="flex-1">
-                          <h3 className="font-bold text-gray-900 group-hover:text-accent-600 transition-colors">{group.name}</h3>
-                          <p className="text-sm text-gray-600 mt-1">{group.members.length} active members</p>
-                          <p className="text-xs text-gray-500 mt-1">
+                          <h3 className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-accent-600 dark:group-hover:text-accent-400 transition-colors">{group.name}</h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{group.members.length} active members</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
                             Owner: {owner?.name}
                           </p>
                         </div>
@@ -211,11 +211,11 @@ const DashboardPage = () => {
               </div>
             ) : (
               <div className="text-center py-12">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
-                  <Users className="w-8 h-8 text-gray-400" />
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 dark:bg-slate-800 rounded-full mb-4">
+                  <Users className="w-8 h-8 text-gray-400 dark:text-gray-600" />
                 </div>
-                <p className="text-gray-500 mb-2">You're not in any groups yet</p>
-                <Link to="/groups" className="text-accent-600 hover:text-accent-700 font-medium text-sm">
+                <p className="text-gray-500 dark:text-gray-400 mb-2">You're not in any groups yet</p>
+                <Link to="/groups" className="text-accent-600 dark:text-accent-400 hover:text-accent-700 dark:hover:text-accent-300 font-medium text-sm">
                   Find or Create a Group →
                 </Link>
               </div>

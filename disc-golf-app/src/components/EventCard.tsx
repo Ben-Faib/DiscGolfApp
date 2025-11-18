@@ -11,21 +11,24 @@ interface EventCardProps {
 const EventCard = ({ event, onViewDetails, onSignUp, isRegistered }: EventCardProps) => {
   const statusConfig = {
     upcoming: {
-      gradient: 'from-blue-500 to-cyan-500',
-      bg: 'bg-blue-50',
-      text: 'text-blue-700',
+      gradient: 'from-primary-500 to-accent-500',
+      bg: 'bg-primary-100 dark:bg-primary-900/30',
+      text: 'text-primary-700 dark:text-primary-300',
+      border: 'border-primary-200 dark:border-primary-800',
       icon: Sparkles,
     },
     ongoing: {
-      gradient: 'from-green-500 to-emerald-500',
-      bg: 'bg-green-50',
-      text: 'text-green-700',
+      gradient: 'from-secondary-500 to-secondary-400',
+      bg: 'bg-secondary-100 dark:bg-secondary-900/30',
+      text: 'text-secondary-700 dark:text-secondary-300',
+      border: 'border-secondary-200 dark:border-secondary-800',
       icon: Target,
     },
     completed: {
       gradient: 'from-gray-500 to-slate-500',
-      bg: 'bg-gray-50',
-      text: 'text-gray-700',
+      bg: 'bg-gray-100 dark:bg-gray-800/50',
+      text: 'text-gray-700 dark:text-gray-300',
+      border: 'border-gray-200 dark:border-gray-700',
       icon: CheckCircle2,
     },
   };
@@ -34,10 +37,10 @@ const EventCard = ({ event, onViewDetails, onSignUp, isRegistered }: EventCardPr
   const StatusIcon = config.icon;
 
   return (
-    <div className="group card overflow-hidden hover:scale-[1.02] animate-fade-in">
+    <div className="group card-interactive overflow-hidden animate-slide-up">
       {/* Status Badge - Floating */}
       <div className="absolute top-4 right-4 z-10">
-        <div className={`flex items-center space-x-1 ${config.bg} ${config.text} px-3 py-1.5 rounded-full text-xs font-semibold shadow-lg backdrop-blur-sm`}>
+        <div className={`flex items-center space-x-1 ${config.bg} ${config.text} ${config.border} border px-3 py-1.5 rounded-full text-xs font-semibold shadow-lg backdrop-blur-sm`}>
           <StatusIcon className="w-3 h-3" />
           <span className="capitalize">{event.status}</span>
         </div>
@@ -51,7 +54,7 @@ const EventCard = ({ event, onViewDetails, onSignUp, isRegistered }: EventCardPr
             alt={event.name}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
         </div>
       ) : (
         <div className={`relative h-48 bg-gradient-to-br ${config.gradient} flex items-center justify-center`}>
@@ -62,37 +65,37 @@ const EventCard = ({ event, onViewDetails, onSignUp, isRegistered }: EventCardPr
       
       {/* Content Section */}
       <div className="p-6">
-        <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-primary-600 transition-colors line-clamp-1">
+        <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors line-clamp-1">
           {event.name}
         </h3>
         
-        <p className="text-gray-600 text-sm mb-4 line-clamp-2 leading-relaxed">
+        <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2 leading-relaxed">
           {event.description}
         </p>
         
         {/* Info Grid */}
         <div className="grid grid-cols-2 gap-3 mb-5">
-          <div className="flex items-center space-x-2 text-sm text-gray-600">
-            <div className="p-1.5 bg-primary-50 rounded-lg">
-              <MapPin className="w-4 h-4 text-primary-600" />
+          <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+            <div className="p-1.5 bg-primary-100 dark:bg-primary-900/30 rounded-lg">
+              <MapPin className="w-4 h-4 text-primary-600 dark:text-primary-400" />
             </div>
             <span className="truncate">{event.location}</span>
           </div>
-          <div className="flex items-center space-x-2 text-sm text-gray-600">
-            <div className="p-1.5 bg-secondary-50 rounded-lg">
-              <Calendar className="w-4 h-4 text-secondary-600" />
+          <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+            <div className="p-1.5 bg-secondary-100 dark:bg-secondary-900/30 rounded-lg">
+              <Calendar className="w-4 h-4 text-secondary-600 dark:text-secondary-400" />
             </div>
             <span className="truncate">{new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
           </div>
-          <div className="flex items-center space-x-2 text-sm text-gray-600">
-            <div className="p-1.5 bg-accent-50 rounded-lg">
-              <Target className="w-4 h-4 text-accent-600" />
+          <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+            <div className="p-1.5 bg-accent-100 dark:bg-accent-900/30 rounded-lg">
+              <Target className="w-4 h-4 text-accent-600 dark:text-accent-400" />
             </div>
             <span>{event.numberOfHoles} holes</span>
           </div>
-          <div className="flex items-center space-x-2 text-sm text-gray-600">
-            <div className="p-1.5 bg-orange-50 rounded-lg">
-              <Users className="w-4 h-4 text-orange-600" />
+          <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+            <div className="p-1.5 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+              <Users className="w-4 h-4 text-orange-600 dark:text-orange-400" />
             </div>
             <span>{event.participants.length} players</span>
           </div>
@@ -103,7 +106,7 @@ const EventCard = ({ event, onViewDetails, onSignUp, isRegistered }: EventCardPr
           {onViewDetails && (
             <button
               onClick={onViewDetails}
-              className="flex-1 flex items-center justify-center space-x-2 px-4 py-2.5 border-2 border-primary-200 text-primary-600 rounded-xl hover:bg-primary-50 transition-all hover:border-primary-400 font-medium"
+              className="flex-1 btn-secondary flex items-center justify-center space-x-2"
             >
               <Eye className="w-4 h-4" />
               <span>Details</span>
@@ -112,13 +115,13 @@ const EventCard = ({ event, onViewDetails, onSignUp, isRegistered }: EventCardPr
           {onSignUp && !isRegistered && event.status === 'upcoming' && (
             <button
               onClick={onSignUp}
-              className="flex-1 px-4 py-2.5 bg-gradient-primary text-white rounded-xl hover:shadow-glow transition-all font-medium hover:scale-105"
+              className="flex-1 btn-primary"
             >
               Sign Up
             </button>
           )}
           {isRegistered && (
-            <div className="flex-1 flex items-center justify-center space-x-2 px-4 py-2.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl font-medium shadow-glow-green">
+            <div className="flex-1 flex items-center justify-center space-x-2 px-4 py-2.5 bg-gradient-secondary text-white rounded-xl font-medium shadow-glow-green">
               <CheckCircle2 className="w-4 h-4" />
               <span>Registered</span>
             </div>
