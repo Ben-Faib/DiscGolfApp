@@ -1,33 +1,61 @@
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
-import { getGroupsByUserId, getScorecardsByUserId, getPlayerStats, getUserById } from '../data';
 import { 
   Calendar, 
-  Users, 
   TrendingUp, 
-  Bell, 
   Target, 
   Award,
-  Clock,
   ArrowRight,
   Sparkles,
-  MapPin,
-  ClipboardList
+  ClipboardList,
+  Loader2
 } from 'lucide-react';
+import { getEventImage } from '../utils/eventImages';
 
 const DashboardPage = () => {
-  const { user } = useAuth();
-  const { events, notifications } = useData();
+  const { 
+    player, 
+    events, 
+    leaderboard, 
+    playerScorecards, 
+    playerHistory,
+    loading, 
+    error 
+  } = useData();
 
-  if (!user) return null;
+  // Find player's leaderboard entry
+  const playerLeaderboardEntry = leaderboard.find(
+    entry => entry.FirstName === player.FirstName && entry.LastName === player.LastName
+  );
 
-  const myGroups = getGroupsByUserId(user.id);
-  const myRecentScorecards = getScorecardsByUserId(user.id).slice(0, 3);
-  const myStats = getPlayerStats(user.id);
-  const unreadNotifications = notifications.filter(n => n.userId === user.id && !n.read);
+  // Get upcoming events
+  const upcomingEvents = events.filter(e => new Date(e.EventDate) >= new Date());
 
-  const userEvents = events.filter(e => e.participants.includes(user.id) && e.status === 'upcoming');
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-primary-500 mx-auto mb-4" />
+          <p className="text-gray-600 dark:text-gray-400">Connecting to database...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center glass-card p-8 max-w-md">
+          <div className="text-6xl mb-4">⚠️</div>
+          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">Connection Error</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-500">
+            Make sure the Flask backend is running on port 5000
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -42,10 +70,10 @@ const DashboardPage = () => {
             <span className="text-white/80 font-medium">Dashboard</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
-            Welcome back, {user.name}!
+            Welcome back, {player.FirstName}!
           </h1>
           <p className="text-white/90 text-lg">
-            Ready to elevate your disc golf game today?
+            Ready to improve your putting game?
           </p>
         </div>
       </div>
@@ -59,10 +87,9 @@ const DashboardPage = () => {
               <div className="p-3 bg-primary-100 dark:bg-primary-900/30 rounded-xl">
                 <Calendar className="w-6 h-6 text-primary-600 dark:text-primary-400" />
               </div>
-              <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">{userEvents.length}</div>
+              <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">{upcomingEvents.length}</div>
             </div>
             <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Upcoming Events</div>
-            <div className="mt-2 text-xs text-primary-600 dark:text-primary-400 font-semibold">VIEW ALL →</div>
           </div>
         </div>
 
@@ -71,12 +98,13 @@ const DashboardPage = () => {
           <div className="relative">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 bg-accent-100 dark:bg-accent-900/30 rounded-xl">
-                <Users className="w-6 h-6 text-accent-600 dark:text-accent-400" />
+                <ClipboardList className="w-6 h-6 text-accent-600 dark:text-accent-400" />
               </div>
-              <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">{myGroups.length}</div>
+              <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                {playerScorecards.length}
+              </div>
             </div>
-            <div className="text-sm font-medium text-gray-600 dark:text-gray-400">My Groups</div>
-            <div className="mt-2 text-xs text-accent-600 dark:text-accent-400 font-semibold">MANAGE →</div>
+            <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Rounds Played</div>
           </div>
         </div>
 
@@ -87,10 +115,11 @@ const DashboardPage = () => {
               <div className="p-3 bg-secondary-100 dark:bg-secondary-900/30 rounded-xl">
                 <TrendingUp className="w-6 h-6 text-secondary-600 dark:text-secondary-400" />
               </div>
-              <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">{myStats?.averageScore || 'N/A'}</div>
+              <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                {playerLeaderboardEntry?.HighTotal || 'N/A'}
+              </div>
             </div>
-            <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Average Score</div>
-            <div className="mt-2 text-xs text-secondary-600 dark:text-secondary-400 font-semibold">SEE STATS →</div>
+            <div className="text-sm font-medium text-gray-600 dark:text-gray-400">High Score (Top 3)</div>
           </div>
         </div>
 
@@ -98,18 +127,14 @@ const DashboardPage = () => {
           <div className="absolute top-0 right-0 w-32 h-32 bg-orange-100 dark:bg-orange-900/50 rounded-full blur-3xl -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform"></div>
           <div className="relative">
             <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-xl relative">
-                <Bell className="w-6 h-6 text-orange-600 dark:text-orange-400" />
-                {unreadNotifications.length > 0 && (
-                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-red-500 to-pink-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                    {unreadNotifications.length}
-                  </div>
-                )}
+              <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-xl">
+                <Award className="w-6 h-6 text-orange-600 dark:text-orange-400" />
               </div>
-              <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">{unreadNotifications.length}</div>
+              <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                #{playerLeaderboardEntry?.DivisionRank || '-'}
+              </div>
             </div>
-            <div className="text-sm font-medium text-gray-600 dark:text-gray-400">New Notifications</div>
-            <div className="mt-2 text-xs text-orange-600 dark:text-orange-400 font-semibold">CHECK NOW →</div>
+            <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Division Rank</div>
           </div>
         </div>
       </div>
@@ -124,7 +149,7 @@ const DashboardPage = () => {
                 <div className="p-2 bg-primary-100 dark:bg-primary-900/30 rounded-lg">
                   <Calendar className="w-5 h-5 text-primary-600 dark:text-primary-400" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">My Upcoming Events</h2>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Upcoming Events</h2>
               </div>
               <Link to="/events" className="flex items-center space-x-1 text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-sm font-medium group">
                 <span>View All</span>
@@ -133,23 +158,36 @@ const DashboardPage = () => {
             </div>
           </div>
           <div className="p-6">
-            {userEvents.length > 0 ? (
+            {upcomingEvents.length > 0 ? (
               <div className="space-y-3">
-                {userEvents.slice(0, 3).map(event => (
-                  <div key={event.id} className="group p-4 rounded-xl border-2 border-primary-100 dark:border-primary-900/50 hover:border-primary-300 dark:hover:border-primary-700 hover:bg-primary-50/50 dark:hover:bg-primary-900/20 transition-all">
-                    <div className="flex items-start space-x-3">
-                      <div className="p-2 bg-gradient-primary rounded-lg shadow-glow shrink-0">
-                        <Target className="w-5 h-5 text-white" />
+                {upcomingEvents.slice(0, 3).map(event => (
+                  <div key={event.EventID} className="group relative rounded-xl overflow-hidden border-2 border-primary-100 dark:border-primary-900/50 hover:border-primary-300 dark:hover:border-primary-700 transition-all">
+                    {/* Background Image */}
+                    <div className="absolute inset-0">
+                      <img 
+                        src={getEventImage(event.EventID)} 
+                        alt="" 
+                        className="w-full h-full object-cover opacity-20 dark:opacity-15 group-hover:opacity-30 dark:group-hover:opacity-25 group-hover:scale-105 transition-all duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-r from-white/80 via-white/60 to-transparent dark:from-slate-900/90 dark:via-slate-900/70 dark:to-transparent"></div>
+                    </div>
+                    
+                    {/* Content */}
+                    <div className="relative p-4 flex items-start space-x-3">
+                      <div className="w-12 h-12 rounded-xl overflow-hidden shadow-lg shrink-0 ring-2 ring-white dark:ring-slate-700">
+                        <img 
+                          src={getEventImage(event.EventID)} 
+                          alt={event.Name}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{event.name}</h3>
-                        <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 mt-1">
-                          <MapPin className="w-4 h-4" />
-                          <span className="truncate">{event.location}</span>
+                        <h3 className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{event.Name}</h3>
+                        <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          {new Date(event.EventDate).toLocaleDateString()}
                         </div>
-                        <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-500 mt-1">
-                          <Clock className="w-3 h-3" />
-                          <span>{new Date(event.date).toLocaleDateString()} at {event.time}</span>
+                        <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                          {event.HoleCount} holes
                         </div>
                       </div>
                     </div>
@@ -162,62 +200,6 @@ const DashboardPage = () => {
                   <Calendar className="w-8 h-8 text-gray-400 dark:text-gray-600" />
                 </div>
                 <p className="text-gray-500 dark:text-gray-400 mb-2">No upcoming events</p>
-                <Link to="/events" className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium text-sm">
-                  Browse Events →
-                </Link>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* My Groups */}
-        <div className="card">
-          <div className="p-6 border-b border-gray-100 dark:border-slate-700">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-accent-100 dark:bg-accent-900/30 rounded-lg">
-                  <Users className="w-5 h-5 text-accent-600 dark:text-accent-400" />
-                </div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">My Groups</h2>
-              </div>
-              <Link to="/groups" className="flex items-center space-x-1 text-accent-600 dark:text-accent-400 hover:text-accent-700 dark:hover:text-accent-300 text-sm font-medium group">
-                <span>View All</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </div>
-          </div>
-          <div className="p-6">
-            {myGroups.length > 0 ? (
-              <div className="space-y-3">
-                {myGroups.slice(0, 3).map(group => {
-                  const owner = getUserById(group.ownerId);
-                  return (
-                    <div key={group.id} className="group p-4 rounded-xl border-2 border-accent-100 dark:border-accent-900/50 hover:border-accent-300 dark:hover:border-accent-700 hover:bg-accent-50/50 dark:hover:bg-accent-900/20 transition-all">
-                      <div className="flex items-start space-x-3">
-                        <div className="p-2 bg-gradient-accent rounded-lg shadow-glow-green shrink-0">
-                          <Users className="w-5 h-5 text-white" />
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-accent-600 dark:group-hover:text-accent-400 transition-colors">{group.name}</h3>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{group.members.length} active members</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                            Owner: {owner?.name}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 dark:bg-slate-800 rounded-full mb-4">
-                  <Users className="w-8 h-8 text-gray-400 dark:text-gray-600" />
-                </div>
-                <p className="text-gray-500 dark:text-gray-400 mb-2">You're not in any groups yet</p>
-                <Link to="/groups" className="text-accent-600 dark:text-accent-400 hover:text-accent-700 dark:hover:text-accent-300 font-medium text-sm">
-                  Find or Create a Group →
-                </Link>
               </div>
             )}
           </div>
@@ -225,97 +207,56 @@ const DashboardPage = () => {
 
         {/* Recent Scorecards */}
         <div className="card">
-          <div className="p-6 border-b border-gray-100">
+          <div className="p-6 border-b border-gray-100 dark:border-slate-700">
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-3">
-                <div className="p-2 bg-secondary-100 rounded-lg">
-                  <ClipboardList className="w-5 h-5 text-secondary-600" />
+                <div className="p-2 bg-secondary-100 dark:bg-secondary-900/30 rounded-lg">
+                  <ClipboardList className="w-5 h-5 text-secondary-600 dark:text-secondary-400" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-900">Recent Scorecards</h2>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Recent Rounds</h2>
               </div>
-              <Link to="/scorecard" className="flex items-center space-x-1 text-secondary-600 hover:text-secondary-700 text-sm font-medium group">
+              <Link to="/scorecard" className="flex items-center space-x-1 text-secondary-600 dark:text-secondary-400 hover:text-secondary-700 dark:hover:text-secondary-300 text-sm font-medium group">
                 <span>View All</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
           </div>
           <div className="p-6">
-            {myRecentScorecards.length > 0 ? (
+            {playerHistory.length > 0 ? (
               <div className="space-y-3">
-                {myRecentScorecards.map(scorecard => {
-                  const event = events.find(e => e.id === scorecard.eventId);
-                  const statusConfig = {
-                    draft: { bg: 'bg-gray-100', text: 'text-gray-700', border: 'border-gray-200' },
-                    submitted: { bg: 'bg-yellow-100', text: 'text-yellow-700', border: 'border-yellow-200' },
-                    approved: { bg: 'bg-green-100', text: 'text-green-700', border: 'border-green-200' },
-                    rejected: { bg: 'bg-red-100', text: 'text-red-700', border: 'border-red-200' },
-                  };
-                  const config = statusConfig[scorecard.status];
-                  return (
-                    <div key={scorecard.id} className="p-4 rounded-xl border-2 border-secondary-100 hover:border-secondary-300 hover:bg-secondary-50/50 transition-all">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <h3 className="font-bold text-gray-900">{event?.name}</h3>
-                          <p className="text-2xl font-bold text-secondary-600 mt-2">Score: {scorecard.totalScore}</p>
+                {playerHistory.slice(0, 5).map(record => (
+                  <div key={record.ScorecardID} className="p-4 rounded-xl border-2 border-secondary-100 dark:border-secondary-900/50 hover:border-secondary-300 dark:hover:border-secondary-700 hover:bg-secondary-50/50 dark:hover:bg-secondary-900/20 transition-all">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <h3 className="font-bold text-gray-900 dark:text-gray-100">{record.EventName}</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          {new Date(record.EventDate).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-secondary-600 dark:text-secondary-400">
+                          {record.ScorecardTotal}
                         </div>
-                        <span className={`px-3 py-1.5 rounded-full text-xs font-semibold border-2 ${config.bg} ${config.text} ${config.border}`}>
-                          {scorecard.status}
-                        </span>
+                        {record.CountsTowardTotal === 'Yes' && (
+                          <span className="text-xs bg-secondary-100 dark:bg-secondary-900/30 text-secondary-700 dark:text-secondary-300 px-2 py-1 rounded-full">
+                            Top 3
+                          </span>
+                        )}
                       </div>
                     </div>
-                  );
-                })}
+                  </div>
+                ))}
               </div>
             ) : (
               <div className="text-center py-12">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
-                  <ClipboardList className="w-8 h-8 text-gray-400" />
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 dark:bg-slate-800 rounded-full mb-4">
+                  <ClipboardList className="w-8 h-8 text-gray-400 dark:text-gray-600" />
                 </div>
-                <p className="text-gray-500">No scorecards yet</p>
+                <p className="text-gray-500 dark:text-gray-400">No scorecards yet</p>
               </div>
             )}
           </div>
         </div>
-
-        {/* Performance Stats */}
-        {myStats && (
-          <div className="card">
-            <div className="p-6 border-b border-gray-100">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-orange-100 rounded-lg">
-                    <Award className="w-5 h-5 text-orange-600" />
-                  </div>
-                  <h2 className="text-xl font-bold text-gray-900">Performance Stats</h2>
-                </div>
-                <Link to="/stats" className="flex items-center space-x-1 text-orange-600 hover:text-orange-700 text-sm font-medium group">
-                  <span>Details</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </Link>
-              </div>
-            </div>
-            <div className="p-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200">
-                  <div className="text-sm font-medium text-green-700 mb-1">Best Score</div>
-                  <div className="text-3xl font-bold text-green-600">{myStats.bestScore}</div>
-                </div>
-                <div className="p-4 bg-gradient-to-br from-primary-50 to-blue-50 rounded-xl border border-primary-200">
-                  <div className="text-sm font-medium text-primary-700 mb-1">Avg Per Hole</div>
-                  <div className="text-3xl font-bold text-primary-600">{myStats.averagePerHole.toFixed(2)}</div>
-                </div>
-                <div className="p-4 bg-gradient-to-br from-secondary-50 to-purple-50 rounded-xl border border-secondary-200">
-                  <div className="text-sm font-medium text-secondary-700 mb-1">Total Events</div>
-                  <div className="text-3xl font-bold text-secondary-600">{myStats.totalEvents}</div>
-                </div>
-                <div className="p-4 bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl border border-orange-200">
-                  <div className="text-sm font-medium text-orange-700 mb-1">Total Rounds</div>
-                  <div className="text-3xl font-bold text-orange-600">{myStats.totalRounds}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Quick Actions */}
@@ -337,25 +278,25 @@ const DashboardPage = () => {
               <div className="text-sm font-bold text-white">Browse Events</div>
             </Link>
             <Link
-              to="/groups"
-              className="group bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-2xl p-6 text-center transition-all hover:scale-105 border border-white/30"
-            >
-              <Users className="w-8 h-8 text-white mx-auto mb-3 group-hover:scale-110 transition-transform" />
-              <div className="text-sm font-bold text-white">Find Groups</div>
-            </Link>
-            <Link
               to="/scorecard"
               className="group bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-2xl p-6 text-center transition-all hover:scale-105 border border-white/30"
             >
               <ClipboardList className="w-8 h-8 text-white mx-auto mb-3 group-hover:scale-110 transition-transform" />
-              <div className="text-sm font-bold text-white">Enter Score</div>
+              <div className="text-sm font-bold text-white">Enter Scores</div>
             </Link>
             <Link
               to="/stats"
               className="group bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-2xl p-6 text-center transition-all hover:scale-105 border border-white/30"
             >
               <TrendingUp className="w-8 h-8 text-white mx-auto mb-3 group-hover:scale-110 transition-transform" />
-              <div className="text-sm font-bold text-white">View Stats</div>
+              <div className="text-sm font-bold text-white">Leaderboard</div>
+            </Link>
+            <Link
+              to="/stats"
+              className="group bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-2xl p-6 text-center transition-all hover:scale-105 border border-white/30"
+            >
+              <Award className="w-8 h-8 text-white mx-auto mb-3 group-hover:scale-110 transition-transform" />
+              <div className="text-sm font-bold text-white">My Stats</div>
             </Link>
           </div>
         </div>
@@ -365,4 +306,3 @@ const DashboardPage = () => {
 };
 
 export default DashboardPage;
-
