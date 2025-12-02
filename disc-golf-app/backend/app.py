@@ -45,6 +45,9 @@ def create_player():
             data['email'],
             data['skillDivision']
         ])
+        # execute_proc returns an array, but we need the first result object
+        if isinstance(result, list) and len(result) > 0:
+            return jsonify(result[0]), 201
         return jsonify(result), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -292,6 +295,9 @@ def create_scorecard():
             data['eventId'],
             data['createdByPlayerId']
         ])
+        # execute_proc returns an array, but we need the first (and only) result object
+        if isinstance(result, list) and len(result) > 0:
+            return jsonify(result[0]), 201
         return jsonify(result), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -319,6 +325,9 @@ def add_scorecard_members(scorecard_id):
             data.get('player3Id'),
             data.get('player4Id')
         ])
+        # execute_proc returns an array, but we need the first result object
+        if isinstance(result, list) and len(result) > 0:
+            return jsonify(result[0]), 201
         return jsonify(result), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -336,6 +345,9 @@ def insert_hole_scores(scorecard_id):
             data['player3Id'], data['player3Score'],
             data['player4Id'], data['player4Score']
         ])
+        # execute_proc returns an array, but we need the first result object
+        if isinstance(result, list) and len(result) > 0:
+            return jsonify(result[0]), 201
         return jsonify(result), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500

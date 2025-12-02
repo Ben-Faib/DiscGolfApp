@@ -236,7 +236,8 @@ export const DataProvider = ({ children }: DataProviderProps) => {
         eventId,
         createdByPlayerId: DEMO_PLAYER.PlayerID,
       });
-      await refreshPlayerScorecards();
+      // Don't refresh here - members haven't been added yet, so the scorecard
+      // won't appear in the player's list until addMembersToScorecard is called
       return result.NewScorecardID;
     } catch (err) {
       console.error('Failed to create scorecard:', err);
