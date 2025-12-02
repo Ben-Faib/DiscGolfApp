@@ -60,14 +60,16 @@ const Navbar = () => {
           {/* Right Section */}
           <div className="flex items-center space-x-3">
             {/* Player Info */}
-            <div className="hidden md:flex flex-col items-end">
-              <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                {player.FirstName} {player.LastName}
-              </span>
-              <span className="text-xs px-3 py-1 rounded-full font-medium bg-gradient-to-r from-primary-500 to-primary-600 text-white">
-                {player.SkillDivision}
-              </span>
-            </div>
+            {player && (
+              <div className="hidden md:flex flex-col items-end">
+                <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                  {player.FirstName} {player.LastName}
+                </span>
+                <span className="text-xs px-3 py-1 rounded-full font-medium bg-gradient-to-r from-primary-500 to-primary-600 text-white">
+                  {player.SkillDivision}
+                </span>
+              </div>
+            )}
 
             <div className="hidden md:block h-8 w-px bg-gray-300 dark:bg-slate-600"></div>
 

@@ -2,21 +2,15 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import * as api from '../utils/api';
 import type { EventLimitFilter } from '../utils/api';
 
-// Demo player - hardcoded for simplified demo (Player 1 from database)
-export const DEMO_PLAYER: api.Player = {
-  PlayerID: 1,
-  FirstName: 'Mike',
-  LastName: 'Anderson',
-  Email: 'mike.anderson@email.com',
-  SkillDivision: 'Advanced',
-};
+// Current player ID - fetched from database on load
+export const CURRENT_PLAYER_ID = 13;
 
 // Re-export for convenience
 export type { EventLimitFilter } from '../utils/api';
 
 interface DataContextType {
-  // Demo player
-  player: api.Player;
+  // Current player (fetched from backend)
+  player: api.Player | null;
   
   // Data from API
   events: api.Event[];
@@ -82,6 +76,7 @@ interface DataProviderProps {
 }
 
 export const DataProvider = ({ children }: DataProviderProps) => {
+  const [player, setPlayer] = useState<api.Player | null>(null);
   const [events, setEvents] = useState<api.Event[]>([]);
   const [players, setPlayers] = useState<api.Player[]>([]);
   const [leaderboard, setLeaderboard] = useState<api.LeaderboardEntry[]>([]);
@@ -114,6 +109,7 @@ export const DataProvider = ({ children }: DataProviderProps) => {
       const defaultFilter: EventLimitFilter = 'latest';
       
       const [
+        playerData,
         eventsData,
         playersData,
         leaderboardData,
@@ -125,11 +121,12 @@ export const DataProvider = ({ children }: DataProviderProps) => {
         holeDifficultyData,
         basketStatsData,
       ] = await Promise.all([
+        api.getPlayer(CURRENT_PLAYER_ID),
         api.getEvents(),
         api.getPlayers(),
         api.getLeaderboard(undefined, defaultFilter),
-        api.getPlayerHistory(DEMO_PLAYER.PlayerID),
-        api.getPlayerScorecards(DEMO_PLAYER.PlayerID),
+        api.getPlayerHistory(CURRENT_PLAYER_ID),
+        api.getPlayerScorecards(CURRENT_PLAYER_ID),
         api.getHotRounds(defaultFilter),
         api.getPodiumStats(defaultFilter),
         api.getTopCards(defaultFilter),
@@ -137,6 +134,7 @@ export const DataProvider = ({ children }: DataProviderProps) => {
         api.getBasketStats(defaultFilter),
       ]);
       
+      setPlayer(playerData);
       setEvents(eventsData);
       setPlayers(playersData);
       setLeaderboard(leaderboardData);
@@ -184,7 +182,7 @@ export const DataProvider = ({ children }: DataProviderProps) => {
 
   const refreshPlayerHistory = async () => {
     try {
-      const data = await api.getPlayerHistory(DEMO_PLAYER.PlayerID);
+      const data = await api.getPlayerHistory(CURRENT_PLAYER_ID);
       setPlayerHistory(data);
     } catch (err) {
       console.error('Failed to refresh player history:', err);
@@ -193,7 +191,7 @@ export const DataProvider = ({ children }: DataProviderProps) => {
 
   const refreshPlayerScorecards = async () => {
     try {
-      const data = await api.getPlayerScorecards(DEMO_PLAYER.PlayerID);
+      const data = await api.getPlayerScorecards(CURRENT_PLAYER_ID);
       setPlayerScorecards(data);
     } catch (err) {
       console.error('Failed to refresh player scorecards:', err);
@@ -285,7 +283,7 @@ export const DataProvider = ({ children }: DataProviderProps) => {
     try {
       const result = await api.createScorecard({
         eventId,
-        createdByPlayerId: DEMO_PLAYER.PlayerID,
+        createdByPlayerId: CURRENT_PLAYER_ID,
       });
       // Don't refresh here - members haven't been added yet, so the scorecard
       // won't appear in the player's list until addMembersToScorecard is called
@@ -368,7 +366,7 @@ export const DataProvider = ({ children }: DataProviderProps) => {
   };
 
   const value: DataContextType = {
-    player: DEMO_PLAYER,
+    player,
     events,
     players,
     leaderboard,

@@ -57,13 +57,13 @@ const DashboardPage = () => {
     );
   }
 
-  if (error) {
+  if (error || !player) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center glass-card p-8 max-w-md">
           <div className="text-6xl mb-4">⚠️</div>
           <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">Connection Error</h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">{error || 'Failed to load player data'}</p>
           <p className="text-sm text-gray-500 dark:text-gray-500">
             Make sure the Flask backend is running on port 5000
           </p>

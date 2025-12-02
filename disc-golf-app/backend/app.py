@@ -8,7 +8,18 @@ from db import execute_query, execute_proc, execute_insert
 from datetime import date
 
 app = Flask(__name__)
-CORS(app)
+
+# Explicit CORS configuration for Chrome compatibility
+CORS(app, resources={
+    r"/api/*": {
+        "origins": ["http://localhost:5173", "http://127.0.0.1:5173"],
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization", "X-Requested-With"],
+        "expose_headers": ["Content-Type"],
+        "supports_credentials": True,
+        "max_age": 600  # Cache preflight requests for 10 minutes
+    }
+})
 
 # ============================================
 # PLAYERS

@@ -392,7 +392,7 @@ const ScorecardPage = () => {
   
   // New Scorecard Form State
   const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
-  const [selectedPlayers, setSelectedPlayers] = useState<number[]>([player.PlayerID]);
+  const [selectedPlayers, setSelectedPlayers] = useState<number[]>(player ? [player.PlayerID] : []);
   const [creating, setCreating] = useState(false);
   
   // New Round Modal UI State
@@ -569,6 +569,7 @@ const ScorecardPage = () => {
 
   // Open new round modal with fresh state (prevents doubling bug)
   const openNewRoundModal = () => {
+    if (!player) return;
     // Reset all modal-related state to prevent carry-over from previous opens
     setSelectedPlayers([player.PlayerID]);
     setSelectedEventId(null);
@@ -706,7 +707,7 @@ const ScorecardPage = () => {
 
   // Save all edited scores
   const handleUpdateHoleScores = async () => {
-    if (!activeScorecard) return;
+    if (!activeScorecard || !player) return;
     
     setUpdating(true);
     try {
@@ -730,7 +731,7 @@ const ScorecardPage = () => {
 
   // Delete scorecard
   const handleDeleteScorecard = async () => {
-    if (!activeScorecard) return;
+    if (!activeScorecard || !player) return;
     
     setDeleting(true);
     try {
@@ -751,7 +752,7 @@ const ScorecardPage = () => {
 
   // Check if current user can remove a specific player from scorecard
   const canRemovePlayer = (targetPlayerId: number): boolean => {
-    if (!activeScorecard) return false;
+    if (!activeScorecard || !player) return false;
     // Must have at least 2 members to remove someone
     if (activeScorecard.members.length <= 1) return false;
     // Creator can remove anyone except themselves if they're the last member
@@ -764,7 +765,7 @@ const ScorecardPage = () => {
 
   // Remove a player from scorecard
   const handleRemovePlayer = async () => {
-    if (!activeScorecard || !playerToRemove) return;
+    if (!activeScorecard || !playerToRemove || !player) return;
     
     setRemovingPlayer(true);
     try {
@@ -797,7 +798,7 @@ const ScorecardPage = () => {
   };
 
   const togglePlayerSelection = (playerId: number) => {
-    if (playerId === player.PlayerID) return;
+    if (!player || playerId === player.PlayerID) return;
     
     // If already selected, remove them
     if (selectedPlayers.includes(playerId)) {
@@ -817,7 +818,7 @@ const ScorecardPage = () => {
   };
 
   const handleSwapPlayer = (playerToRemove: number) => {
-    if (playerToRemove === player.PlayerID || !pendingPlayer) return;
+    if (!player || playerToRemove === player.PlayerID || !pendingPlayer) return;
     
     setSelectedPlayers(prev => {
       const newPlayers = prev.filter(id => id !== playerToRemove);
@@ -972,13 +973,13 @@ const ScorecardPage = () => {
   }
 
   // Error state
-  if (error) {
+  if (error || !player) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center glass-card p-8 max-w-md">
           <div className="text-6xl mb-4">⚠️</div>
           <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">Connection Error</h2>
-          <p className="text-gray-600 dark:text-gray-400">{error}</p>
+          <p className="text-gray-600 dark:text-gray-400">{error || 'Failed to load player data'}</p>
         </div>
       </div>
     );
