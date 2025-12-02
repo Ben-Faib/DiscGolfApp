@@ -85,7 +85,7 @@ def get_leaderboard():
             if division:
                 results = execute_query("""
                     WITH LatestEvent AS (
-                        SELECT MAX(EventDate) as MaxDate FROM Event
+                        SELECT TOP 1 EventID, EventDate FROM Event ORDER BY EventDate DESC, EventID DESC
                     ),
                     LatestScores AS (
                         SELECT 
@@ -97,7 +97,7 @@ def get_leaderboard():
                             ROW_NUMBER() OVER (PARTITION BY p.SkillDivision ORDER BY psh.ScorecardTotal DESC) as DivisionRank
                         FROM vw_PlayerScoreHistory psh
                         JOIN Player p ON psh.PlayerID = p.PlayerID
-                        WHERE psh.EventDate = (SELECT MaxDate FROM LatestEvent)
+                        WHERE psh.EventID = (SELECT EventID FROM LatestEvent)
                         AND p.SkillDivision = ?
                     )
                     SELECT 
@@ -114,7 +114,7 @@ def get_leaderboard():
             else:
                 results = execute_query("""
                     WITH LatestEvent AS (
-                        SELECT MAX(EventDate) as MaxDate FROM Event
+                        SELECT TOP 1 EventID, EventDate FROM Event ORDER BY EventDate DESC, EventID DESC
                     ),
                     LatestScores AS (
                         SELECT 
@@ -126,7 +126,7 @@ def get_leaderboard():
                             ROW_NUMBER() OVER (PARTITION BY p.SkillDivision ORDER BY psh.ScorecardTotal DESC) as DivisionRank
                         FROM vw_PlayerScoreHistory psh
                         JOIN Player p ON psh.PlayerID = p.PlayerID
-                        WHERE psh.EventDate = (SELECT MaxDate FROM LatestEvent)
+                        WHERE psh.EventID = (SELECT EventID FROM LatestEvent)
                     )
                     SELECT 
                         SkillDivision,

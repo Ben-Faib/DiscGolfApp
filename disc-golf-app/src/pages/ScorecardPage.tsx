@@ -339,11 +339,14 @@ const ScoreAnimationOverlay = ({ playerName, score, onComplete }: ScoreAnimation
         </div>
 
         {/* Crickets text */}
-        <div className="crickets-text text-center absolute" style={{ top: '68%' }}>
-          <div className="text-4xl font-black italic text-amber-900 tracking-widest drop-shadow-lg">
+        <div
+          className="crickets-text text-center absolute px-4 py-3 rounded-2xl bg-black/50 backdrop-blur-sm shadow-2xl"
+          style={{ top: '68%' }}
+        >
+          <div className="text-4xl font-black italic text-amber-50 tracking-widest drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">
             *crickets*
           </div>
-          <div className="text-lg font-semibold text-amber-800 mt-2">
+          <div className="text-lg font-semibold text-amber-100 mt-2">
             {playerName} heard nothing but silence
           </div>
         </div>
@@ -469,16 +472,18 @@ const ScorecardPage = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeScorecardId, activeScorecard, currentHole, isAnimating]);
 
-  const loadScorecardDetails = async (id: number) => {
+  const loadScorecardDetails = async (id: number, autoNavigate: boolean = true) => {
     const details = await getScorecard(id);
     setActiveScorecard(details);
     if (details) {
-      // Find the next hole to score
-      const scoredHoles = new Set(details.scores.map(s => s.HoleNumber));
-      for (let i = 1; i <= (details.HoleCount || 9); i++) {
-        if (!scoredHoles.has(i)) {
-          setCurrentHole(i);
-          break;
+      // Only auto-navigate to next unscored hole on initial load, not on refresh
+      if (autoNavigate) {
+        const scoredHoles = new Set(details.scores.map(s => s.HoleNumber));
+        for (let i = 1; i <= (details.HoleCount || 9); i++) {
+          if (!scoredHoles.has(i)) {
+            setCurrentHole(i);
+            break;
+          }
         }
       }
       // Initialize scores for members
@@ -562,6 +567,26 @@ const ScorecardPage = () => {
     setEditedScores({});
   };
 
+  // Open new round modal with fresh state (prevents doubling bug)
+  const openNewRoundModal = () => {
+    // Reset all modal-related state to prevent carry-over from previous opens
+    setSelectedPlayers([player.PlayerID]);
+    setSelectedEventId(null);
+    setEventSectionExpanded(true);
+    setPlayerSearchQuery('');
+    setShowCreatePlayerForm(false);
+    setShowSwapDialog(false);
+    setPendingPlayer(null);
+    // Reset create player form state
+    setNewPlayerFirstName('');
+    setNewPlayerLastName('');
+    setNewPlayerEmail('');
+    setNewPlayerDivision('Recreational');
+    setCreatePlayerError(null);
+    // Show the modal
+    setShowNewScorecardModal(true);
+  };
+
   const handleCreateScorecard = async () => {
     if (!selectedEventId) return;
     
@@ -617,7 +642,8 @@ const ScorecardPage = () => {
       const success = await submitHoleScores(activeScorecard.ScorecardID, currentHole, scores);
       
       if (success) {
-        await loadScorecardDetails(activeScorecard.ScorecardID);
+        // Refresh scorecard data without auto-navigating (we handle navigation explicitly below)
+        await loadScorecardDetails(activeScorecard.ScorecardID, false);
         
         // Auto-advance to next hole if not on last
         if (currentHole < (activeScorecard.HoleCount || 9)) {
@@ -691,8 +717,8 @@ const ScorecardPage = () => {
       
       await Promise.all(updatePromises);
       
-      // Reload scorecard and exit edit mode
-      await loadScorecardDetails(activeScorecard.ScorecardID);
+      // Reload scorecard data without auto-navigating (stay on current hole after editing)
+      await loadScorecardDetails(activeScorecard.ScorecardID, false);
       setIsEditingHole(false);
       setEditedScores({});
     } catch (err) {
@@ -1606,7 +1632,7 @@ const ScorecardPage = () => {
           <p className="text-gray-600 dark:text-gray-400 mt-1">Track your rounds</p>
         </div>
         <button
-          onClick={() => setShowNewScorecardModal(true)}
+          onClick={openNewRoundModal}
           className="btn-primary flex items-center space-x-2"
         >
           <Plus className="w-5 h-5" />
@@ -1687,7 +1713,7 @@ const ScorecardPage = () => {
           <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">No scorecards yet</h3>
           <p className="text-gray-500 dark:text-gray-400 mb-6">Start tracking your disc golf rounds</p>
           <button
-            onClick={() => setShowNewScorecardModal(true)}
+            onClick={openNewRoundModal}
             className="btn-primary inline-flex items-center space-x-2"
           >
             <Plus className="w-5 h-5" />
