@@ -179,5 +179,211 @@
   .text-shadow-lg {
     text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   }
+
+  /* Staggered Animation Delays */
+  .stagger-1 { animation-delay: 0.05s; }
+  .stagger-2 { animation-delay: 0.1s; }
+  .stagger-3 { animation-delay: 0.15s; }
+  .stagger-4 { animation-delay: 0.2s; }
+  .stagger-5 { animation-delay: 0.25s; }
+  .stagger-6 { animation-delay: 0.3s; }
+
+  /* Slide Up Fade Animation */
+  .animate-slide-up-fade {
+    animation: slideUpFade 0.5s ease-out forwards;
+    opacity: 0;
+  }
+
+  @keyframes slideUpFade {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Shimmer Animation for Skeletons */
+  .animate-shimmer {
+    background: linear-gradient(
+      90deg,
+      theme('colors.gray.200') 0%,
+      theme('colors.gray.100') 50%,
+      theme('colors.gray.200') 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+
+  .dark .animate-shimmer {
+    background: linear-gradient(
+      90deg,
+      theme('colors.slate.700') 0%,
+      theme('colors.slate.600') 50%,
+      theme('colors.slate.700') 100%
+    );
+    background-size: 200% 100%;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+
+  /* Perfect Score Celebration Animations */
+  .celebrate-container {
+    position: relative;
+    overflow: visible;
+  }
+
+  /* Golden burst effect */
+  .celebrate-burst {
+    animation: celebrateBurst 0.6s ease-out forwards;
+  }
+
+  @keyframes celebrateBurst {
+    0% {
+      transform: scale(0.8);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.3);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  /* Glow pulse effect */
+  .celebrate-glow {
+    animation: celebrateGlow 1.5s ease-in-out;
+  }
+
+  @keyframes celebrateGlow {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(251, 191, 36, 0);
+    }
+    25% {
+      box-shadow: 0 0 30px 10px rgba(251, 191, 36, 0.6);
+    }
+    50% {
+      box-shadow: 0 0 50px 20px rgba(251, 191, 36, 0.4);
+    }
+    75% {
+      box-shadow: 0 0 30px 10px rgba(251, 191, 36, 0.2);
+    }
+  }
+
+  /* Confetti particles */
+  .confetti-piece {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    animation: confettiFall 1.5s ease-out forwards;
+  }
+
+  @keyframes confettiFall {
+    0% {
+      transform: translateY(0) rotate(0deg) scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(-80px) rotate(720deg) scale(0);
+      opacity: 0;
+    }
+  }
+
+  /* Sparkle effect */
+  .sparkle {
+    position: absolute;
+    animation: sparkle 0.8s ease-out forwards;
+  }
+
+  @keyframes sparkle {
+    0% {
+      transform: scale(0) rotate(0deg);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.2) rotate(180deg);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(0) rotate(360deg);
+      opacity: 0;
+    }
+  }
+
+  /* Perfect text flash */
+  .perfect-text {
+    animation: perfectTextPop 1s ease-out forwards;
+  }
+
+  @keyframes perfectTextPop {
+    0% {
+      transform: scale(0) translateY(10px);
+      opacity: 0;
+    }
+    30% {
+      transform: scale(1.3) translateY(-5px);
+      opacity: 1;
+    }
+    60% {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(0.8) translateY(-20px);
+      opacity: 0;
+    }
+  }
+
+  /* Ring burst effect */
+  .ring-burst {
+    position: absolute;
+    border-radius: 50%;
+    border: 3px solid rgba(251, 191, 36, 0.8);
+    animation: ringBurst 0.8s ease-out forwards;
+  }
+
+  @keyframes ringBurst {
+    0% {
+      transform: scale(0.5);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(2.5);
+      opacity: 0;
+    }
+  }
+
+  /* Star burst for celebration */
+  .star-burst {
+    animation: starBurst 0.6s ease-out forwards;
+  }
+
+  @keyframes starBurst {
+    0% {
+      transform: scale(0) rotate(-30deg);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.4) rotate(15deg);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1) rotate(0deg);
+      opacity: 1;
+    }
+  }
 }
 

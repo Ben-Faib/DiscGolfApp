@@ -3,14 +3,17 @@ import { useData } from '../context/DataContext';
 import { 
   Calendar, 
   TrendingUp, 
-  Target, 
   Award,
   ArrowRight,
   Sparkles,
-  ClipboardList,
-  Loader2
+  ClipboardList
 } from 'lucide-react';
 import { getEventImage } from '../utils/eventImages';
+import { 
+  SkeletonHero, 
+  SkeletonStatCard, 
+  SkeletonContentCard 
+} from '../components/Skeleton';
 
 const DashboardPage = () => {
   const { 
@@ -33,10 +36,22 @@ const DashboardPage = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-primary-500 mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">Connecting to database...</p>
+      <div className="space-y-8">
+        {/* Hero Skeleton */}
+        <SkeletonHero className="animate-slide-up-fade stagger-1" />
+        
+        {/* Stat Cards Skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <SkeletonStatCard className="animate-slide-up-fade stagger-2" />
+          <SkeletonStatCard className="animate-slide-up-fade stagger-3" />
+          <SkeletonStatCard className="animate-slide-up-fade stagger-4" />
+          <SkeletonStatCard className="animate-slide-up-fade stagger-5" />
+        </div>
+        
+        {/* Content Cards Skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <SkeletonContentCard className="animate-slide-up-fade stagger-6" />
+          <SkeletonContentCard className="animate-slide-up-fade stagger-6" />
         </div>
       </div>
     );
@@ -58,9 +73,9 @@ const DashboardPage = () => {
   }
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-8">
       {/* Hero Section */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-primary p-8 md:p-12 shadow-glow">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-primary p-8 md:p-12 shadow-glow animate-slide-up-fade stagger-1">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
         
@@ -80,7 +95,7 @@ const DashboardPage = () => {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="card group hover:scale-105 p-6 relative overflow-hidden">
+        <div className="card group hover:scale-105 p-6 relative overflow-hidden animate-slide-up-fade stagger-2">
           <div className="absolute top-0 right-0 w-32 h-32 bg-primary-100 dark:bg-primary-900/50 rounded-full blur-3xl -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform"></div>
           <div className="relative">
             <div className="flex items-center justify-between mb-4">
@@ -93,7 +108,7 @@ const DashboardPage = () => {
           </div>
         </div>
 
-        <div className="card group hover:scale-105 p-6 relative overflow-hidden">
+        <div className="card group hover:scale-105 p-6 relative overflow-hidden animate-slide-up-fade stagger-3">
           <div className="absolute top-0 right-0 w-32 h-32 bg-accent-100 dark:bg-accent-900/50 rounded-full blur-3xl -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform"></div>
           <div className="relative">
             <div className="flex items-center justify-between mb-4">
@@ -108,7 +123,7 @@ const DashboardPage = () => {
           </div>
         </div>
 
-        <div className="card group hover:scale-105 p-6 relative overflow-hidden">
+        <div className="card group hover:scale-105 p-6 relative overflow-hidden animate-slide-up-fade stagger-4">
           <div className="absolute top-0 right-0 w-32 h-32 bg-secondary-100 dark:bg-secondary-900/50 rounded-full blur-3xl -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform"></div>
           <div className="relative">
             <div className="flex items-center justify-between mb-4">
@@ -123,7 +138,7 @@ const DashboardPage = () => {
           </div>
         </div>
 
-        <div className="card group hover:scale-105 p-6 relative overflow-hidden">
+        <div className="card group hover:scale-105 p-6 relative overflow-hidden animate-slide-up-fade stagger-5">
           <div className="absolute top-0 right-0 w-32 h-32 bg-orange-100 dark:bg-orange-900/50 rounded-full blur-3xl -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform"></div>
           <div className="relative">
             <div className="flex items-center justify-between mb-4">
@@ -142,7 +157,7 @@ const DashboardPage = () => {
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Upcoming Events */}
-        <div className="card">
+        <div className="card animate-slide-up-fade stagger-6">
           <div className="p-6 border-b border-gray-100 dark:border-slate-700">
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-3">
@@ -206,7 +221,7 @@ const DashboardPage = () => {
         </div>
 
         {/* Recent Scorecards */}
-        <div className="card">
+        <div className="card animate-slide-up-fade stagger-6">
           <div className="p-6 border-b border-gray-100 dark:border-slate-700">
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-3">

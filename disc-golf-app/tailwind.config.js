@@ -75,6 +75,12 @@ export default {
         'slide-in-right': 'slideInRight 0.3s ease-out',
         'toast-in': 'toastIn 0.3s ease-out',
         'toast-out': 'toastOut 0.3s ease-in',
+        'celebrate-burst': 'celebrateBurst 0.6s ease-out forwards',
+        'celebrate-glow': 'celebrateGlow 1.5s ease-in-out',
+        'confetti': 'confettiFall 1.5s ease-out forwards',
+        'sparkle': 'sparkle 0.8s ease-out forwards',
+        'perfect-pop': 'perfectPop 1s ease-out forwards',
+        'ring-burst': 'ringBurst 0.8s ease-out forwards',
       },
       keyframes: {
         fadeIn: {
@@ -108,6 +114,36 @@ export default {
         toastOut: {
           '0%': { transform: 'translateY(0) scale(1)', opacity: '1' },
           '100%': { transform: 'translateY(100%) scale(0.8)', opacity: '0' },
+        },
+        celebrateBurst: {
+          '0%': { transform: 'scale(0.8)', opacity: '0' },
+          '50%': { transform: 'scale(1.3)', opacity: '1' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        celebrateGlow: {
+          '0%, 100%': { boxShadow: '0 0 0 0 rgba(251, 191, 36, 0)' },
+          '25%': { boxShadow: '0 0 30px 10px rgba(251, 191, 36, 0.6)' },
+          '50%': { boxShadow: '0 0 50px 20px rgba(251, 191, 36, 0.4)' },
+          '75%': { boxShadow: '0 0 30px 10px rgba(251, 191, 36, 0.2)' },
+        },
+        confettiFall: {
+          '0%': { transform: 'translateY(0) rotate(0deg) scale(1)', opacity: '1' },
+          '100%': { transform: 'translateY(-80px) rotate(720deg) scale(0)', opacity: '0' },
+        },
+        sparkle: {
+          '0%': { transform: 'scale(0) rotate(0deg)', opacity: '1' },
+          '50%': { transform: 'scale(1.2) rotate(180deg)', opacity: '1' },
+          '100%': { transform: 'scale(0) rotate(360deg)', opacity: '0' },
+        },
+        perfectPop: {
+          '0%': { transform: 'scale(0) translateY(10px)', opacity: '0' },
+          '30%': { transform: 'scale(1.3) translateY(-5px)', opacity: '1' },
+          '60%': { transform: 'scale(1) translateY(0)', opacity: '1' },
+          '100%': { transform: 'scale(0.8) translateY(-20px)', opacity: '0' },
+        },
+        ringBurst: {
+          '0%': { transform: 'scale(0.5)', opacity: '1' },
+          '100%': { transform: 'scale(2.5)', opacity: '0' },
         },
       },
       backdropBlur: {

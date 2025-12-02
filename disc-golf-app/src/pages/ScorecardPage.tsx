@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, TouchEvent } from 'react';
+import { useState, useEffect, useRef, TouchEvent, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import * as api from '../utils/api';
@@ -17,8 +17,116 @@ import {
   Disc3,
   Pencil,
   Trash2,
-  AlertTriangle
+  AlertTriangle,
+  Star,
+  Sparkles
 } from 'lucide-react';
+
+// Confetti colors for celebration
+const CONFETTI_COLORS = [
+  '#FFD700', // Gold
+  '#FFA500', // Orange  
+  '#FF6B6B', // Coral
+  '#4ECDC4', // Teal
+  '#45B7D1', // Sky blue
+  '#96CEB4', // Mint
+  '#FFEAA7', // Light yellow
+  '#DDA0DD', // Plum
+];
+
+// Celebration overlay component
+const CelebrationOverlay = ({ playerName, onComplete }: { playerName: string; onComplete: () => void }) => {
+  useEffect(() => {
+    const timer = setTimeout(onComplete, 1800);
+    return () => clearTimeout(timer);
+  }, [onComplete]);
+
+  // Generate random confetti pieces
+  const confettiPieces = Array.from({ length: 12 }, (_, i) => ({
+    id: i,
+    color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+    left: `${10 + Math.random() * 80}%`,
+    delay: `${Math.random() * 0.3}s`,
+    rotation: Math.random() * 360,
+  }));
+
+  // Generate sparkle positions
+  const sparkles = Array.from({ length: 6 }, (_, i) => ({
+    id: i,
+    left: `${20 + Math.random() * 60}%`,
+    top: `${20 + Math.random() * 60}%`,
+    delay: `${i * 0.1}s`,
+    size: 12 + Math.random() * 8,
+  }));
+
+  return (
+    <div className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center">
+      {/* Background flash */}
+      <div className="absolute inset-0 bg-gradient-to-t from-amber-500/20 via-yellow-400/10 to-transparent animate-fade-in" />
+      
+      {/* Ring burst effects */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="ring-burst w-20 h-20" style={{ animationDelay: '0s' }} />
+        <div className="ring-burst w-20 h-20" style={{ animationDelay: '0.2s' }} />
+        <div className="ring-burst w-20 h-20" style={{ animationDelay: '0.4s' }} />
+      </div>
+
+      {/* Confetti pieces */}
+      {confettiPieces.map((piece) => (
+        <div
+          key={piece.id}
+          className="confetti-piece"
+          style={{
+            backgroundColor: piece.color,
+            left: piece.left,
+            bottom: '40%',
+            animationDelay: piece.delay,
+            transform: `rotate(${piece.rotation}deg)`,
+          }}
+        />
+      ))}
+
+      {/* Sparkles */}
+      {sparkles.map((s) => (
+        <div
+          key={s.id}
+          className="sparkle"
+          style={{
+            left: s.left,
+            top: s.top,
+            animationDelay: s.delay,
+          }}
+        >
+          <Sparkles 
+            className="text-yellow-400" 
+            style={{ width: s.size, height: s.size }} 
+          />
+        </div>
+      ))}
+
+      {/* Central celebration content */}
+      <div className="relative flex flex-col items-center celebrate-burst">
+        {/* Star icon */}
+        <div className="star-burst mb-2">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 flex items-center justify-center shadow-lg celebrate-glow">
+            <Star className="w-10 h-10 text-white fill-white" />
+          </div>
+        </div>
+
+        {/* Perfect text */}
+        <div className="perfect-text text-center">
+          <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 drop-shadow-lg">
+            PERFECT!
+          </div>
+          <div className="text-sm font-bold text-amber-600 dark:text-amber-400 mt-1">
+            {playerName} scored 3!
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+import { SkeletonText, SkeletonScorecardItem, Skeleton } from '../components/Skeleton';
 
 // Player colors for avatars
 const PLAYER_COLORS = [
@@ -76,6 +184,9 @@ const ScorecardPage = () => {
   // Delete Scorecard State
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  // Celebration State
+  const [celebratingPlayer, setCelebratingPlayer] = useState<{ id: number; name: string } | null>(null);
 
   // Touch handling for swipe
   const touchStartX = useRef<number>(0);
@@ -229,12 +340,21 @@ const ScorecardPage = () => {
     }));
   };
 
-  const setScore = (playerId: number, score: number) => {
+  const setScore = useCallback((playerId: number, score: number) => {
+    const clampedScore = Math.max(0, Math.min(3, score));
     setHoleScores(prev => ({
       ...prev,
-      [playerId]: Math.max(0, Math.min(3, score))
+      [playerId]: clampedScore
     }));
-  };
+
+    // Trigger celebration for perfect score of 3
+    if (clampedScore === 3 && activeScorecard) {
+      const member = activeScorecard.members.find(m => m.PlayerID === playerId);
+      if (member) {
+        setCelebratingPlayer({ id: playerId, name: member.FirstName });
+      }
+    }
+  }, [activeScorecard]);
 
   const handleSaveHoleScores = async () => {
     if (!activeScorecard) return;
@@ -382,10 +502,21 @@ const ScorecardPage = () => {
   // Loading state - for initial data load
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-primary-500 mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">Loading scorecards...</p>
+      <div className="space-y-6">
+        {/* Header Skeleton */}
+        <div className="flex items-center justify-between animate-slide-up-fade stagger-1">
+          <div>
+            <SkeletonText className="w-36 h-8 mb-2" />
+            <SkeletonText className="w-32" />
+          </div>
+          <Skeleton className="w-32 h-12 rounded-xl" />
+        </div>
+        
+        {/* Scorecard Items Skeleton */}
+        <div className="space-y-4">
+          <SkeletonScorecardItem className="animate-slide-up-fade stagger-2" />
+          <SkeletonScorecardItem className="animate-slide-up-fade stagger-3" />
+          <SkeletonScorecardItem className="animate-slide-up-fade stagger-4" />
         </div>
       </div>
     );
@@ -394,10 +525,53 @@ const ScorecardPage = () => {
   // Loading state - for specific scorecard (prevents flash of list on refresh)
   if (activeScorecardId && !activeScorecard) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-primary-500 mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">Loading scorecard...</p>
+      <div className="min-h-screen flex flex-col">
+        {/* Header Skeleton */}
+        <div className="bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-700 p-4 pb-6">
+          <div className="flex items-center justify-between mb-3">
+            <Skeleton className="w-16 h-6 rounded" />
+            <Skeleton className="w-24 h-4 rounded" />
+          </div>
+          <div className="text-center space-y-2">
+            <Skeleton className="w-48 h-7 mx-auto rounded" />
+            <Skeleton className="w-32 h-4 mx-auto rounded" />
+          </div>
+          {/* Progress dots skeleton */}
+          <div className="flex justify-center items-center gap-1.5 mt-4">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => (
+              <div key={i} className="w-7 h-7 rounded-full bg-white/20 animate-pulse" />
+            ))}
+          </div>
+        </div>
+        
+        {/* Content Skeleton */}
+        <div className="flex-1 bg-gray-50 dark:bg-slate-900 p-4">
+          <div className="flex items-center justify-between mb-6">
+            <Skeleton className="w-12 h-12 rounded-full" />
+            <div className="text-center">
+              <Skeleton className="w-12 h-4 mx-auto mb-2 rounded" />
+              <Skeleton className="w-16 h-12 mx-auto rounded" />
+            </div>
+            <Skeleton className="w-12 h-12 rounded-full" />
+          </div>
+          
+          {/* Player cards skeleton */}
+          <div className="space-y-3">
+            {[1, 2].map(i => (
+              <div key={i} className="bg-white dark:bg-slate-800 rounded-2xl p-4 animate-slide-up-fade" style={{ animationDelay: `${i * 0.1}s` }}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <Skeleton className="w-12 h-12 rounded-full" />
+                    <div className="space-y-2">
+                      <SkeletonText className="w-24" />
+                      <SkeletonText className="w-16" />
+                    </div>
+                  </div>
+                  <Skeleton className="w-20 h-14 rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -628,18 +802,28 @@ const ScorecardPage = () => {
                               −
                             </button>
                             
-                            <div className="w-16 h-14 flex items-center justify-center">
+                            <div className={`w-16 h-14 flex items-center justify-center relative ${
+                              currentScore === 3 && !isEditingHole ? 'celebrate-container' : ''
+                            }`}>
+                              {currentScore === 3 && !isEditingHole && (
+                                <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-amber-400/20 rounded-xl animate-pulse" />
+                              )}
                               <span className={`
-                                text-4xl font-black transition-all
+                                text-4xl font-black transition-all relative z-10
                                 ${isEditingHole 
                                   ? 'text-amber-600 dark:text-amber-400' 
-                                  : currentScore > 0 
-                                    ? 'text-gray-900 dark:text-gray-100' 
-                                    : 'text-gray-300 dark:text-gray-600'
+                                  : currentScore === 3
+                                    ? 'bg-gradient-to-r from-yellow-500 to-amber-500 bg-clip-text text-transparent drop-shadow-sm'
+                                    : currentScore > 0 
+                                      ? 'text-gray-900 dark:text-gray-100' 
+                                      : 'text-gray-300 dark:text-gray-600'
                                 }
                               `}>
                                 {currentScore}
                               </span>
+                              {currentScore === 3 && !isEditingHole && (
+                                <Star className="absolute -top-1 -right-1 w-4 h-4 text-yellow-500 fill-yellow-400" />
+                              )}
                             </div>
                             
                             <button
@@ -665,13 +849,20 @@ const ScorecardPage = () => {
                               key={score}
                               onClick={() => setScore(member.PlayerID, score)}
                               className={`
-                                flex-1 py-2 rounded-lg text-sm font-bold transition-all
+                                flex-1 py-2 rounded-lg text-sm font-bold transition-all relative
                                 ${holeScores[member.PlayerID] === score
-                                  ? 'bg-emerald-500 text-white shadow-md'
-                                  : 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
+                                  ? score === 3
+                                    ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white shadow-lg shadow-amber-300/50'
+                                    : 'bg-emerald-500 text-white shadow-md'
+                                  : score === 3
+                                    ? 'bg-gradient-to-r from-yellow-100 to-amber-100 dark:from-yellow-900/30 dark:to-amber-900/30 text-amber-700 dark:text-amber-400 hover:from-yellow-200 hover:to-amber-200 dark:hover:from-yellow-800/40 dark:hover:to-amber-800/40 border border-amber-300 dark:border-amber-700'
+                                    : 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
                                 }
                               `}
                             >
+                              {score === 3 && holeScores[member.PlayerID] !== 3 && (
+                                <Star className="w-3 h-3 absolute top-0.5 right-0.5 text-amber-500" />
+                              )}
                               {score}
                             </button>
                           ))}
@@ -931,6 +1122,14 @@ const ScorecardPage = () => {
             </div>
           </div>
         )}
+
+        {/* Perfect Score Celebration Overlay */}
+        {celebratingPlayer && (
+          <CelebrationOverlay 
+            playerName={celebratingPlayer.name}
+            onComplete={() => setCelebratingPlayer(null)}
+          />
+        )}
       </div>
     );
   }
@@ -939,9 +1138,9 @@ const ScorecardPage = () => {
   // SCORECARD LIST VIEW
   // ====================================
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between animate-slide-up-fade stagger-1">
         <div>
           <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Scorecards</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">Track your rounds</p>
@@ -958,13 +1157,13 @@ const ScorecardPage = () => {
       {/* Scorecards List */}
       {playerScorecards.length > 0 ? (
         <div className="space-y-4">
-          {playerScorecards.map(scorecard => {
+          {playerScorecards.map((scorecard, index) => {
             const eventImage = getEventImage(scorecard.EventID);
             return (
               <button
                 key={scorecard.ScorecardID}
                 onClick={() => navigate(`/scorecard/${scorecard.ScorecardID}`)}
-                className="w-full card overflow-hidden cursor-pointer hover:scale-[1.02] transition-all text-left group"
+                className={`w-full card overflow-hidden cursor-pointer hover:scale-[1.02] transition-all text-left group animate-slide-up-fade stagger-${Math.min(index + 2, 6)}`}
               >
                 <div className="relative">
                   {/* Background Image Strip */}
@@ -1020,7 +1219,7 @@ const ScorecardPage = () => {
           })}
         </div>
       ) : (
-        <div className="glass-card p-12 text-center">
+        <div className="glass-card p-12 text-center animate-slide-up-fade stagger-2">
           <div className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-3xl 
                         flex items-center justify-center mx-auto mb-4 shadow-lg">
             <Disc3 className="w-10 h-10 text-white" />

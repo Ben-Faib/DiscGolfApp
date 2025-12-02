@@ -3,7 +3,6 @@ import { useData } from '../context/DataContext';
 import { 
   Calendar, 
   Target, 
-  MapPin, 
   Clock,
   ChevronDown,
   ChevronUp,
@@ -11,6 +10,7 @@ import {
 } from 'lucide-react';
 import * as api from '../utils/api';
 import { getEventImage } from '../utils/eventImages';
+import { SkeletonEventCard, SkeletonText } from '../components/Skeleton';
 
 const EventsPage = () => {
   const { events, loading, error } = useData();
@@ -46,10 +46,26 @@ const EventsPage = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-primary-500 mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">Loading events...</p>
+      <div className="space-y-8">
+        {/* Header Skeleton */}
+        <div className="animate-slide-up-fade stagger-1">
+          <SkeletonText className="w-32 h-8 mb-2" />
+          <SkeletonText className="w-64" />
+        </div>
+        
+        {/* Section Header Skeleton */}
+        <div className="animate-slide-up-fade stagger-2">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="w-9 h-9 rounded-lg animate-shimmer" />
+            <SkeletonText className="w-48 h-6" />
+          </div>
+        </div>
+        
+        {/* Event Cards Skeleton */}
+        <div className="space-y-4">
+          <SkeletonEventCard className="animate-slide-up-fade stagger-3" />
+          <SkeletonEventCard className="animate-slide-up-fade stagger-4" />
+          <SkeletonEventCard className="animate-slide-up-fade stagger-5" />
         </div>
       </div>
     );
@@ -204,14 +220,14 @@ const EventsPage = () => {
   };
 
   return (
-    <div className="space-y-8 animate-fade-in">
-      <div>
+    <div className="space-y-8">
+      <div className="animate-slide-up-fade stagger-1">
         <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Events</h1>
         <p className="text-gray-600 dark:text-gray-400 mt-1">Browse putting league events and see course details</p>
       </div>
 
       {/* Upcoming Events */}
-      <div>
+      <div className="animate-slide-up-fade stagger-2">
         <div className="flex items-center space-x-3 mb-4">
           <div className="p-2 bg-primary-100 dark:bg-primary-900/30 rounded-lg">
             <Clock className="w-5 h-5 text-primary-600 dark:text-primary-400" />
@@ -223,8 +239,13 @@ const EventsPage = () => {
         
         {upcomingEvents.length > 0 ? (
           <div className="space-y-4">
-            {upcomingEvents.map(event => (
-              <EventCard key={event.EventID} event={event} />
+            {upcomingEvents.map((event, index) => (
+              <div 
+                key={event.EventID} 
+                className={`animate-slide-up-fade stagger-${Math.min(index + 3, 6)}`}
+              >
+                <EventCard event={event} />
+              </div>
             ))}
           </div>
         ) : (
@@ -237,7 +258,7 @@ const EventsPage = () => {
 
       {/* Past Events */}
       {pastEvents.length > 0 && (
-        <div>
+        <div className="animate-slide-up-fade stagger-5">
           <div className="flex items-center space-x-3 mb-4">
             <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
               <Calendar className="w-5 h-5 text-gray-500" />
@@ -248,15 +269,20 @@ const EventsPage = () => {
           </div>
           
           <div className="space-y-4">
-            {pastEvents.map(event => (
-              <EventCard key={event.EventID} event={event} isPast />
+            {pastEvents.map((event, index) => (
+              <div 
+                key={event.EventID} 
+                className={`animate-slide-up-fade stagger-${Math.min(index + 6, 6)}`}
+              >
+                <EventCard event={event} isPast />
+              </div>
             ))}
           </div>
         </div>
       )}
 
       {events.length === 0 && (
-        <div className="glass-card p-12 text-center">
+        <div className="glass-card p-12 text-center animate-slide-up-fade stagger-3">
           <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <p className="text-gray-500 dark:text-gray-400 text-lg">No events found</p>
         </div>

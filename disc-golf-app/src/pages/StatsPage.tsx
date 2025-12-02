@@ -1,11 +1,12 @@
 import { useState, useMemo } from 'react';
 import { useData } from '../context/DataContext';
 import { 
-  Trophy, Medal, Award, TrendingUp, Loader2, 
+  Trophy, Medal, Award, TrendingUp, TrendingDown, Minus, Loader2, 
   Flame, Target, Users, Mountain, Circle,
   ChevronDown, Calendar, Hash
 } from 'lucide-react';
 import { getEventImageByName } from '../utils/eventImages';
+import { Skeleton, SkeletonText, SkeletonCircle, SkeletonLeaderboardRow } from '../components/Skeleton';
 
 type TabType = 'leaderboard' | 'hotRounds' | 'podium' | 'topCards' | 'holeDifficulty' | 'basketStats';
 
@@ -132,10 +133,45 @@ const StatsPage = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-primary-500 mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">Loading stats...</p>
+      <div className="space-y-6">
+        {/* Header Skeleton */}
+        <div className="animate-slide-up-fade stagger-1">
+          <SkeletonText className="w-24 h-8 mb-2" />
+          <SkeletonText className="w-48" />
+        </div>
+
+        {/* Tab Navigation Skeleton */}
+        <div className="glass-card p-2 animate-slide-up-fade stagger-2">
+          <div className="flex flex-wrap gap-1">
+            {[1, 2, 3, 4, 5, 6].map(i => (
+              <Skeleton key={i} className="h-12 w-24 sm:w-32 rounded-xl" />
+            ))}
+          </div>
+        </div>
+
+        {/* Leaderboard Card Skeleton */}
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 animate-slide-up-fade stagger-3">
+          {/* Card Header */}
+          <div className="p-6 border-b border-gray-100 dark:border-slate-700">
+            <div className="flex items-center space-x-3">
+              <SkeletonCircle className="w-9 h-9" />
+              <SkeletonText className="w-40 h-6" />
+            </div>
+          </div>
+          
+          {/* Table Header Skeleton */}
+          <div className="bg-gray-50 dark:bg-slate-800 py-4 px-6 flex gap-4">
+            <SkeletonText className="w-16" />
+            <SkeletonText className="w-32" />
+            <SkeletonText className="w-16 ml-auto" />
+            <SkeletonText className="w-20" />
+            <SkeletonText className="w-20" />
+          </div>
+          
+          {/* Leaderboard Rows Skeleton */}
+          {[1, 2, 3, 4, 5].map(i => (
+            <SkeletonLeaderboardRow key={i} className={`animate-slide-up-fade stagger-${Math.min(i + 3, 6)}`} />
+          ))}
         </div>
       </div>
     );
@@ -153,7 +189,24 @@ const StatsPage = () => {
     );
   }
 
-  const renderLeaderboardTab = () => (
+  const renderLeaderboardTab = () => {
+    // Calculate max values for progress bars
+    const maxRounds = Math.max(...filteredLeaderboard.map(e => e.RoundsPlayed), 1);
+    const maxBestRound = Math.max(...filteredLeaderboard.map(e => e.BestScorecardTotal), 1);
+    const maxHighTotal = Math.max(...filteredLeaderboard.map(e => e.HighTotal), 1);
+
+    // Get trend indicator based on rank position
+    const getTrendIndicator = (rank: number, totalEntries: number) => {
+      const percentile = rank / totalEntries;
+      if (percentile <= 0.33) {
+        return <TrendingUp className="w-4 h-4 text-green-500" />;
+      } else if (percentile <= 0.66) {
+        return <Minus className="w-4 h-4 text-yellow-500" />;
+      }
+      return <TrendingDown className="w-4 h-4 text-red-400" />;
+    };
+
+    return (
     <>
       {/* Division Filter */}
       <div className="glass-card p-4 mb-6">
@@ -175,7 +228,12 @@ const StatsPage = () => {
       </div>
 
       {/* Leaderboard Tables */}
-      {Object.entries(leaderboardByDivision).map(([division, entries]) => (
+      {Object.entries(leaderboardByDivision).map(([division, entries]) => {
+        const divisionMaxRounds = Math.max(...entries.map(e => e.RoundsPlayed), 1);
+        const divisionMaxBest = Math.max(...entries.map(e => e.BestScorecardTotal), 1);
+        const divisionMaxTotal = Math.max(...entries.map(e => e.HighTotal), 1);
+        
+        return (
         <div key={division} className="card mb-6">
           <div className="p-6 border-b border-gray-100 dark:border-slate-700">
             <div className="flex items-center space-x-3">
@@ -199,7 +257,12 @@ const StatsPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {entries.map((entry) => (
+                {entries.map((entry) => {
+                  const roundsPercent = (entry.RoundsPlayed / divisionMaxRounds) * 100;
+                  const bestPercent = (entry.BestScorecardTotal / divisionMaxBest) * 100;
+                  const totalPercent = (entry.HighTotal / divisionMaxTotal) * 100;
+                  
+                  return (
                   <tr 
                     key={`${entry.FirstName}-${entry.LastName}`}
                     className={`border-b border-gray-100 dark:border-slate-700 transition-colors ${
@@ -211,6 +274,7 @@ const StatsPage = () => {
                     <td className="py-4 px-6">
                       <div className="flex items-center space-x-2">
                         {getRankIcon(entry.DivisionRank)}
+                        {getTrendIndicator(entry.DivisionRank, entries.length)}
                       </div>
                     </td>
                     <td className="py-4 px-6">
@@ -231,22 +295,48 @@ const StatsPage = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="py-4 px-6 text-center">
-                      <span className="text-lg font-bold text-gray-700 dark:text-gray-300">{entry.RoundsPlayed}</span>
+                    <td className="py-4 px-6">
+                      <div className="flex flex-col items-center gap-1">
+                        <span className="text-lg font-bold text-gray-700 dark:text-gray-300">{entry.RoundsPlayed}</span>
+                        <div className="w-16 h-1.5 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-gradient-to-r from-gray-400 to-gray-500 dark:from-gray-500 dark:to-gray-400 rounded-full transition-all duration-500"
+                            style={{ width: `${roundsPercent}%` }}
+                          />
+                        </div>
+                      </div>
                     </td>
-                    <td className="py-4 px-6 text-center">
-                      <span className="text-lg font-bold text-secondary-600 dark:text-secondary-400">{entry.BestScorecardTotal}</span>
+                    <td className="py-4 px-6">
+                      <div className="flex flex-col items-center gap-1">
+                        <span className="text-lg font-bold text-secondary-600 dark:text-secondary-400">{entry.BestScorecardTotal}</span>
+                        <div className="w-16 h-1.5 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-gradient-to-r from-secondary-400 to-secondary-500 rounded-full transition-all duration-500"
+                            style={{ width: `${bestPercent}%` }}
+                          />
+                        </div>
+                      </div>
                     </td>
-                    <td className="py-4 px-6 text-center">
-                      <span className="text-2xl font-bold text-primary-600 dark:text-primary-400">{entry.HighTotal}</span>
+                    <td className="py-4 px-6">
+                      <div className="flex flex-col items-center gap-1">
+                        <span className="text-2xl font-bold text-primary-600 dark:text-primary-400">{entry.HighTotal}</span>
+                        <div className="w-20 h-2 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-gradient-primary rounded-full transition-all duration-500"
+                            style={{ width: `${totalPercent}%` }}
+                          />
+                        </div>
+                      </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
         </div>
-      ))}
+        );
+      })}
 
       {/* Player Score History */}
       {playerHistory.length > 0 && (
@@ -312,9 +402,22 @@ const StatsPage = () => {
         </div>
       )}
     </>
-  );
+    );
+  };
 
-  const renderHotRoundsTab = () => (
+  const renderHotRoundsTab = () => {
+    // Calculate max score for progress bars
+    const maxScore = Math.max(...hotRounds.map(r => r.RoundTotal), 1);
+    
+    // Get flame intensity based on score percentile
+    const getFlameIntensity = (score: number) => {
+      const percentile = score / maxScore;
+      if (percentile >= 0.9) return { flames: 3, color: 'from-red-500 to-orange-500', glow: 'shadow-[0_0_15px_rgba(239,68,68,0.5)]' };
+      if (percentile >= 0.7) return { flames: 2, color: 'from-orange-500 to-yellow-500', glow: 'shadow-[0_0_10px_rgba(249,115,22,0.4)]' };
+      return { flames: 1, color: 'from-yellow-500 to-amber-400', glow: '' };
+    };
+
+    return (
     <div className="card">
       <div className="p-6 border-b border-gray-100 dark:border-slate-700">
         <div className="flex items-center space-x-3">
@@ -343,11 +446,15 @@ const StatsPage = () => {
                 <th className="text-center py-4 px-6 font-semibold text-gray-700 dark:text-gray-300">Division</th>
                 <th className="text-center py-4 px-6 font-semibold text-gray-700 dark:text-gray-300">Score</th>
                 <th className="text-center py-4 px-6 font-semibold text-gray-700 dark:text-gray-300">Holes</th>
-                <th className="text-center py-4 px-6 font-semibold text-gray-700 dark:text-gray-300">Badge</th>
+                <th className="text-center py-4 px-6 font-semibold text-gray-700 dark:text-gray-300">Heat</th>
               </tr>
             </thead>
             <tbody>
-              {hotRounds.map((round, idx) => (
+              {hotRounds.map((round, idx) => {
+                const scorePercent = (round.RoundTotal / maxScore) * 100;
+                const flameInfo = getFlameIntensity(round.RoundTotal);
+                
+                return (
                 <tr key={idx} className="border-b border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800/50">
                   <td className="py-4 px-6">
                     <div className="flex items-center space-x-3">
@@ -379,25 +486,39 @@ const StatsPage = () => {
                       {round.SkillDivision}
                     </span>
                   </td>
-                  <td className="py-4 px-6 text-center">
-                    <span className="text-2xl font-bold text-primary-600 dark:text-primary-400">{round.RoundTotal}</span>
+                  <td className="py-4 px-6">
+                    <div className="flex flex-col items-center gap-1.5">
+                      <div className="relative">
+                        <span className={`text-2xl font-bold bg-gradient-to-r ${flameInfo.color} bg-clip-text text-transparent`}>
+                          {round.RoundTotal}
+                        </span>
+                      </div>
+                      <div className="w-20 h-2 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                        <div 
+                          className={`h-full bg-gradient-to-r ${flameInfo.color} rounded-full transition-all duration-500`}
+                          style={{ width: `${scorePercent}%` }}
+                        />
+                      </div>
+                    </div>
                   </td>
                   <td className="py-4 px-6 text-center text-gray-700 dark:text-gray-300">{round.HolesPlayed}</td>
                   <td className="py-4 px-6 text-center">
-                    {round.BadgeType && (
-                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-orange-500 to-red-500 text-white">
-                        {round.BadgeType}
-                      </span>
-                    )}
+                    <div className={`inline-flex items-center gap-0.5 px-3 py-1.5 rounded-full bg-gradient-to-r ${flameInfo.color} ${flameInfo.glow}`}>
+                      {Array.from({ length: flameInfo.flames }).map((_, i) => (
+                        <Flame key={i} className="w-4 h-4 text-white" />
+                      ))}
+                    </div>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>
       )}
     </div>
-  );
+    );
+  };
 
   const renderPodiumTab = () => (
     <div className="card">
@@ -746,7 +867,20 @@ const StatsPage = () => {
     </div>
   );
 
-  const renderBasketStatsTab = () => (
+  const renderBasketStatsTab = () => {
+    // Calculate score distribution percentages for stacked bars
+    const getDistributionPercents = (basket: typeof basketStats[0]) => {
+      const total = basket.ZeroScores + basket.OneScores + basket.TwoScores + basket.PerfectScores;
+      if (total === 0) return { zero: 0, one: 0, two: 0, perfect: 0 };
+      return {
+        zero: (basket.ZeroScores / total) * 100,
+        one: (basket.OneScores / total) * 100,
+        two: (basket.TwoScores / total) * 100,
+        perfect: (basket.PerfectScores / total) * 100
+      };
+    };
+
+    return (
     <div className="card">
       <div className="p-6 border-b border-gray-100 dark:border-slate-700">
         <div className="flex items-center space-x-3">
@@ -779,7 +913,10 @@ const StatsPage = () => {
               </tr>
             </thead>
             <tbody>
-              {basketStats.map((basket, idx) => (
+              {basketStats.map((basket, idx) => {
+                const dist = getDistributionPercents(basket);
+                
+                return (
                 <tr key={idx} className="border-b border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800/50">
                   <td className="py-4 px-6">
                     <div className="font-semibold text-gray-900 dark:text-gray-100">{basket.Brand}</div>
@@ -800,19 +937,49 @@ const StatsPage = () => {
                     </span>
                   </td>
                   <td className="py-4 px-6">
-                    <div className="flex items-center justify-center space-x-1 text-xs">
-                      <span className="px-2 py-1 rounded bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400">
-                        0: {basket.ZeroScores}
-                      </span>
-                      <span className="px-2 py-1 rounded bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400">
-                        1: {basket.OneScores}
-                      </span>
-                      <span className="px-2 py-1 rounded bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400">
-                        2: {basket.TwoScores}
-                      </span>
-                      <span className="px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
-                        3: {basket.PerfectScores}
-                      </span>
+                    <div className="flex flex-col gap-2">
+                      {/* Stacked bar visualization */}
+                      <div className="w-full h-4 bg-gray-100 dark:bg-slate-700 rounded-full overflow-hidden flex">
+                        <div 
+                          className="h-full bg-red-500 transition-all duration-500" 
+                          style={{ width: `${dist.zero}%` }}
+                          title={`0: ${basket.ZeroScores}`}
+                        />
+                        <div 
+                          className="h-full bg-orange-500 transition-all duration-500" 
+                          style={{ width: `${dist.one}%` }}
+                          title={`1: ${basket.OneScores}`}
+                        />
+                        <div 
+                          className="h-full bg-yellow-500 transition-all duration-500" 
+                          style={{ width: `${dist.two}%` }}
+                          title={`2: ${basket.TwoScores}`}
+                        />
+                        <div 
+                          className="h-full bg-green-500 transition-all duration-500" 
+                          style={{ width: `${dist.perfect}%` }}
+                          title={`3: ${basket.PerfectScores}`}
+                        />
+                      </div>
+                      {/* Legend with counts */}
+                      <div className="flex justify-between text-[10px] font-medium">
+                        <span className="flex items-center gap-1">
+                          <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                          <span className="text-gray-600 dark:text-gray-400">{basket.ZeroScores}</span>
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <span className="w-2 h-2 rounded-full bg-orange-500"></span>
+                          <span className="text-gray-600 dark:text-gray-400">{basket.OneScores}</span>
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <span className="w-2 h-2 rounded-full bg-yellow-500"></span>
+                          <span className="text-gray-600 dark:text-gray-400">{basket.TwoScores}</span>
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                          <span className="text-gray-600 dark:text-gray-400">{basket.PerfectScores}</span>
+                        </span>
+                      </div>
                     </div>
                   </td>
                   <td className="py-4 px-6 text-center">
@@ -821,13 +988,15 @@ const StatsPage = () => {
                     </span>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>
       )}
     </div>
-  );
+    );
+  };
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -842,14 +1011,14 @@ const StatsPage = () => {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div>
+    <div className="space-y-6">
+      <div className="animate-slide-up-fade stagger-1">
         <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Stats</h1>
         <p className="text-gray-600 dark:text-gray-400 mt-1">League statistics and rankings</p>
       </div>
 
       {/* Tab Navigation */}
-      <div className="glass-card p-2">
+      <div className="glass-card p-2 animate-slide-up-fade stagger-2">
         <div className="flex flex-wrap gap-1">
           {tabs.map(tab => {
             const Icon = tab.icon;
@@ -872,7 +1041,9 @@ const StatsPage = () => {
       </div>
 
       {/* Tab Content */}
-      {renderTabContent()}
+      <div className="animate-slide-up-fade stagger-3">
+        {renderTabContent()}
+      </div>
     </div>
   );
 };
