@@ -19,7 +19,13 @@ import {
   Trash2,
   AlertTriangle,
   Star,
-  Sparkles
+  Sparkles,
+  Search,
+  ArrowLeftRight,
+  Calendar,
+  Zap,
+  Heart,
+  Wind
 } from 'lucide-react';
 
 // Confetti colors for celebration
@@ -34,97 +40,318 @@ const CONFETTI_COLORS = [
   '#DDA0DD', // Plum
 ];
 
-// Celebration overlay component
-const CelebrationOverlay = ({ playerName, onComplete }: { playerName: string; onComplete: () => void }) => {
+// Unified Score Animation Overlay
+interface ScoreAnimationProps {
+  playerName: string;
+  score: number;
+  onComplete: () => void;
+}
+
+const ScoreAnimationOverlay = ({ playerName, score, onComplete }: ScoreAnimationProps) => {
   useEffect(() => {
-    const timer = setTimeout(onComplete, 1800);
+    const durations: Record<number, number> = {
+      0: 3200,
+      1: 1800,
+      2: 1800,
+      3: 2500
+    };
+    const timer = setTimeout(onComplete, durations[score] || 1800);
     return () => clearTimeout(timer);
-  }, [onComplete]);
+  }, [onComplete, score]);
 
-  // Generate random confetti pieces
-  const confettiPieces = Array.from({ length: 12 }, (_, i) => ({
-    id: i,
-    color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
-    left: `${10 + Math.random() * 80}%`,
-    delay: `${Math.random() * 0.3}s`,
-    rotation: Math.random() * 360,
-  }));
+  // Score 3 - Perfect! (existing celebration)
+  if (score === 3) {
+    const confettiPieces = Array.from({ length: 12 }, (_, i) => ({
+      id: i,
+      color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+      left: `${10 + Math.random() * 80}%`,
+      delay: `${Math.random() * 0.3}s`,
+      rotation: Math.random() * 360,
+    }));
 
-  // Generate sparkle positions
-  const sparkles = Array.from({ length: 6 }, (_, i) => ({
-    id: i,
-    left: `${20 + Math.random() * 60}%`,
-    top: `${20 + Math.random() * 60}%`,
-    delay: `${i * 0.1}s`,
-    size: 12 + Math.random() * 8,
-  }));
+    const sparkles = Array.from({ length: 6 }, (_, i) => ({
+      id: i,
+      left: `${20 + Math.random() * 60}%`,
+      top: `${20 + Math.random() * 60}%`,
+      delay: `${i * 0.1}s`,
+      size: 12 + Math.random() * 8,
+    }));
 
-  return (
-    <div className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center">
-      {/* Background flash */}
-      <div className="absolute inset-0 bg-gradient-to-t from-amber-500/20 via-yellow-400/10 to-transparent animate-fade-in" />
-      
-      {/* Ring burst effects */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="ring-burst w-20 h-20" style={{ animationDelay: '0s' }} />
-        <div className="ring-burst w-20 h-20" style={{ animationDelay: '0.2s' }} />
-        <div className="ring-burst w-20 h-20" style={{ animationDelay: '0.4s' }} />
-      </div>
+    return (
+      <div className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center">
+        <div className="absolute inset-0 bg-gradient-to-t from-amber-500/20 via-yellow-400/10 to-transparent animate-fade-in" />
+        
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="ring-burst w-20 h-20" style={{ animationDelay: '0s' }} />
+          <div className="ring-burst w-20 h-20" style={{ animationDelay: '0.2s' }} />
+          <div className="ring-burst w-20 h-20" style={{ animationDelay: '0.4s' }} />
+        </div>
 
-      {/* Confetti pieces */}
-      {confettiPieces.map((piece) => (
-        <div
-          key={piece.id}
-          className="confetti-piece"
-          style={{
-            backgroundColor: piece.color,
-            left: piece.left,
-            bottom: '40%',
-            animationDelay: piece.delay,
-            transform: `rotate(${piece.rotation}deg)`,
-          }}
-        />
-      ))}
-
-      {/* Sparkles */}
-      {sparkles.map((s) => (
-        <div
-          key={s.id}
-          className="sparkle"
-          style={{
-            left: s.left,
-            top: s.top,
-            animationDelay: s.delay,
-          }}
-        >
-          <Sparkles 
-            className="text-yellow-400" 
-            style={{ width: s.size, height: s.size }} 
+        {confettiPieces.map((piece) => (
+          <div
+            key={piece.id}
+            className="confetti-piece"
+            style={{
+              backgroundColor: piece.color,
+              left: piece.left,
+              bottom: '40%',
+              animationDelay: piece.delay,
+              transform: `rotate(${piece.rotation}deg)`,
+            }}
           />
-        </div>
-      ))}
+        ))}
 
-      {/* Central celebration content */}
-      <div className="relative flex flex-col items-center celebrate-burst">
-        {/* Star icon */}
-        <div className="star-burst mb-2">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 flex items-center justify-center shadow-lg celebrate-glow">
-            <Star className="w-10 h-10 text-white fill-white" />
+        {sparkles.map((s) => (
+          <div
+            key={s.id}
+            className="sparkle"
+            style={{
+              left: s.left,
+              top: s.top,
+              animationDelay: s.delay,
+            }}
+          >
+            <Sparkles 
+              className="text-yellow-400" 
+              style={{ width: s.size, height: s.size }} 
+            />
           </div>
-        </div>
+        ))}
 
-        {/* Perfect text */}
-        <div className="perfect-text text-center">
-          <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 drop-shadow-lg">
-            PERFECT!
+        <div className="relative flex flex-col items-center celebrate-burst">
+          <div className="star-burst mb-3">
+            <div className="w-24 h-24 rounded-full bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 flex items-center justify-center shadow-xl celebrate-glow">
+              <Star className="w-14 h-14 text-white fill-white" />
+            </div>
           </div>
-          <div className="text-sm font-bold text-amber-600 dark:text-amber-400 mt-1">
-            {playerName} scored 3!
+
+          <div className="perfect-text text-center">
+            <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 drop-shadow-lg">
+              PERFECT!
+            </div>
+            <div className="text-xl font-bold text-amber-600 dark:text-amber-400 mt-2">
+              {playerName} scored 3!
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  }
+
+  // Score 2 - Nice Shot!
+  if (score === 2) {
+    const greenSparkles = Array.from({ length: 8 }, (_, i) => ({
+      id: i,
+      left: `${30 + Math.random() * 40}%`,
+      top: `${35 + Math.random() * 20}%`,
+      delay: `${i * 0.05}s`,
+    }));
+
+    return (
+      <div className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center">
+        <div className="absolute inset-0 bg-gradient-to-t from-green-500/15 via-emerald-400/8 to-transparent animate-fade-in" />
+        
+        {greenSparkles.map((s) => (
+          <div
+            key={s.id}
+            className="green-sparkle"
+            style={{
+              left: s.left,
+              top: s.top,
+              animationDelay: s.delay,
+            }}
+          />
+        ))}
+
+        <div className="relative flex flex-col items-center zap-burst">
+          <div className="zap-burst mb-3">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-r from-green-400 via-emerald-500 to-teal-500 flex items-center justify-center shadow-xl nice-shot-glow">
+              <Zap className="w-12 h-12 text-white fill-white" />
+            </div>
+          </div>
+
+          <div className="nice-shot-text text-center">
+            <div className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-emerald-500 to-teal-500 drop-shadow-lg">
+              NICE SHOT!
+            </div>
+            <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400 mt-2">
+              {playerName} got 2!
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Score 1 - Close Call! (target with heartbeat)
+  if (score === 1) {
+    // Miss marks that appear at the edges before the final hit
+    const missMarks = [
+      { id: 1, x: -35, y: -20, delay: '0.3s', rotation: -15 },
+      { id: 2, x: 30, y: 25, delay: '0.6s', rotation: 20 },
+    ];
+
+    return (
+      <div className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center">
+        {/* Tense red/coral background that transitions to relief */}
+        <div className="absolute inset-0 bg-gradient-to-t from-rose-500/15 via-orange-400/10 to-transparent animate-fade-in" />
+        
+        {/* Heartbeat pulse rings */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="heartbeat-ring" style={{ animationDelay: '0.8s' }} />
+          <div className="heartbeat-ring" style={{ animationDelay: '1.0s' }} />
+          <div className="heartbeat-ring" style={{ animationDelay: '1.2s' }} />
+        </div>
+
+        {/* Target/Bullseye */}
+        <div className="relative target-appear">
+          {/* Outer ring */}
+          <div className="w-32 h-32 rounded-full border-4 border-rose-400/60 flex items-center justify-center">
+            {/* Middle ring */}
+            <div className="w-24 h-24 rounded-full border-4 border-orange-400/70 flex items-center justify-center">
+              {/* Inner ring */}
+              <div className="w-16 h-16 rounded-full border-4 border-amber-400/80 flex items-center justify-center">
+                {/* Bullseye center - turns green on hit */}
+                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-emerald-400 to-green-500 hit-center shadow-lg" />
+              </div>
+            </div>
+          </div>
+
+          {/* Miss marks (X) near the edges */}
+          {missMarks.map((mark) => (
+            <div
+              key={mark.id}
+              className="miss-mark absolute"
+              style={{
+                left: `calc(50% + ${mark.x}px)`,
+                top: `calc(50% + ${mark.y}px)`,
+                animationDelay: mark.delay,
+                transform: `translate(-50%, -50%) rotate(${mark.rotation}deg)`,
+              }}
+            >
+              <X className="w-6 h-6 text-rose-500 stroke-[3]" />
+            </div>
+          ))}
+
+          {/* Final hit mark in center */}
+          <div className="hit-mark absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+            <Check className="w-8 h-8 text-emerald-500 stroke-[3]" />
+          </div>
+
+          {/* Heart pulse icon */}
+          <div className="absolute -right-4 -top-4 heart-pulse">
+            <Heart className="w-8 h-8 text-rose-500 fill-rose-400" />
+          </div>
+        </div>
+
+        {/* Text */}
+        <div className="close-call-text text-center absolute" style={{ top: '62%' }}>
+          <div className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-rose-500 via-orange-500 to-emerald-500 drop-shadow-lg">
+            Close call!
+          </div>
+          <div className="text-base font-semibold text-rose-600 dark:text-rose-400 mt-2">
+            {playerName} barely made it
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Score 0 - Tumbleweed / Crickets (western desert comedy)
+  if (score === 0) {
+    // Dust particles floating in the wind
+    const dustParticles = [
+      { id: 1, left: '15%', top: '30%', delay: '0.3s', size: 4 },
+      { id: 2, left: '25%', top: '50%', delay: '0.5s', size: 3 },
+      { id: 3, left: '40%', top: '35%', delay: '0.4s', size: 5 },
+      { id: 4, left: '55%', top: '55%', delay: '0.6s', size: 3 },
+      { id: 5, left: '70%', top: '40%', delay: '0.35s', size: 4 },
+      { id: 6, left: '80%', top: '60%', delay: '0.55s', size: 3 },
+      { id: 7, left: '35%', top: '65%', delay: '0.7s', size: 4 },
+      { id: 8, left: '60%', top: '25%', delay: '0.45s', size: 3 },
+    ];
+
+    // Wind streaks
+    const windStreaks = [
+      { id: 1, top: '35%', delay: '0.2s' },
+      { id: 2, top: '50%', delay: '0.35s' },
+      { id: 3, top: '65%', delay: '0.5s' },
+    ];
+
+    return (
+      <div className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center overflow-hidden">
+        {/* Desert background with dust haze */}
+        <div className="absolute inset-0 desert-bg animate-fade-in" />
+        
+        {/* Wind streaks */}
+        {windStreaks.map((streak) => (
+          <div
+            key={streak.id}
+            className="wind-streak"
+            style={{
+              top: streak.top,
+              animationDelay: streak.delay,
+            }}
+          />
+        ))}
+
+        {/* Floating dust particles */}
+        {dustParticles.map((particle) => (
+          <div
+            key={particle.id}
+            className="dust-particle"
+            style={{
+              left: particle.left,
+              top: particle.top,
+              width: particle.size,
+              height: particle.size,
+              animationDelay: particle.delay,
+            }}
+          />
+        ))}
+
+        {/* Rolling tumbleweed */}
+        <div className="tumbleweed-container">
+          <div className="tumbleweed">
+            {/* Tumbleweed made with CSS circles */}
+            <div className="tumbleweed-core" />
+            <div className="tumbleweed-branch tumbleweed-branch-1" />
+            <div className="tumbleweed-branch tumbleweed-branch-2" />
+            <div className="tumbleweed-branch tumbleweed-branch-3" />
+            <div className="tumbleweed-branch tumbleweed-branch-4" />
+          </div>
+        </div>
+
+        {/* Lonely abandoned disc */}
+        <div className="lonely-disc-container">
+          <div className="lonely-disc">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-300 via-orange-400 to-amber-500 flex items-center justify-center shadow-xl">
+              <Disc3 className="w-12 h-12 text-amber-900/70" />
+            </div>
+          </div>
+          {/* Disc shadow on ground */}
+          <div className="disc-ground-shadow" />
+        </div>
+
+        {/* Wind icon */}
+        <div className="wind-icon">
+          <Wind className="w-10 h-10 text-amber-600/70" />
+        </div>
+
+        {/* Crickets text */}
+        <div className="crickets-text text-center absolute" style={{ top: '68%' }}>
+          <div className="text-4xl font-black italic text-amber-900 tracking-widest drop-shadow-lg">
+            *crickets*
+          </div>
+          <div className="text-lg font-semibold text-amber-800 mt-2">
+            {playerName} heard nothing but silence
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
 };
 import { SkeletonText, SkeletonScorecardItem, Skeleton } from '../components/Skeleton';
 
@@ -151,7 +378,8 @@ const ScorecardPage = () => {
     addMembersToScorecard,
     submitHoleScores,
     getScorecard,
-    refreshPlayerScorecards
+    refreshPlayerScorecards,
+    refreshPlayers
   } = useData();
 
   // UI State
@@ -163,6 +391,21 @@ const ScorecardPage = () => {
   const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
   const [selectedPlayers, setSelectedPlayers] = useState<number[]>([player.PlayerID]);
   const [creating, setCreating] = useState(false);
+  
+  // New Round Modal UI State
+  const [eventSectionExpanded, setEventSectionExpanded] = useState(true);
+  const [playerSearchQuery, setPlayerSearchQuery] = useState('');
+  const [showSwapDialog, setShowSwapDialog] = useState(false);
+  const [pendingPlayer, setPendingPlayer] = useState<number | null>(null);
+  
+  // Create Player Form State
+  const [showCreatePlayerForm, setShowCreatePlayerForm] = useState(false);
+  const [newPlayerFirstName, setNewPlayerFirstName] = useState('');
+  const [newPlayerLastName, setNewPlayerLastName] = useState('');
+  const [newPlayerEmail, setNewPlayerEmail] = useState('');
+  const [newPlayerDivision, setNewPlayerDivision] = useState('Recreational');
+  const [creatingPlayer, setCreatingPlayer] = useState(false);
+  const [createPlayerError, setCreatePlayerError] = useState<string | null>(null);
 
   // Hole Navigation State
   const [currentHole, setCurrentHole] = useState(1);
@@ -185,8 +428,13 @@ const ScorecardPage = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  // Celebration State
-  const [celebratingPlayer, setCelebratingPlayer] = useState<{ id: number; name: string } | null>(null);
+  // Remove Player from Scorecard State
+  const [showRemovePlayerConfirm, setShowRemovePlayerConfirm] = useState(false);
+  const [playerToRemove, setPlayerToRemove] = useState<{ id: number; name: string } | null>(null);
+  const [removingPlayer, setRemovingPlayer] = useState(false);
+
+  // Score Animation State
+  const [celebratingPlayer, setCelebratingPlayer] = useState<{ id: number; name: string; score: number } | null>(null);
 
   // Touch handling for swipe
   const touchStartX = useRef<number>(0);
@@ -347,11 +595,11 @@ const ScorecardPage = () => {
       [playerId]: clampedScore
     }));
 
-    // Trigger celebration for perfect score of 3
-    if (clampedScore === 3 && activeScorecard) {
+    // Trigger animation for any score
+    if (activeScorecard) {
       const member = activeScorecard.members.find(m => m.PlayerID === playerId);
       if (member) {
-        setCelebratingPlayer({ id: playerId, name: member.FirstName });
+        setCelebratingPlayer({ id: playerId, name: member.FirstName, score: clampedScore });
       }
     }
   }, [activeScorecard]);
@@ -411,15 +659,24 @@ const ScorecardPage = () => {
   };
 
   // Handle score change in edit mode
-  const handleEditScoreChange = (playerId: number, newStrokes: number) => {
+  const handleEditScoreChange = useCallback((playerId: number, newStrokes: number) => {
+    const clampedScore = Math.max(0, Math.min(3, newStrokes));
     setEditedScores(prev => ({
       ...prev,
       [playerId]: {
         ...prev[playerId],
-        strokes: Math.max(0, Math.min(3, newStrokes))
+        strokes: clampedScore
       }
     }));
-  };
+
+    // Trigger animation for edited score
+    if (activeScorecard) {
+      const member = activeScorecard.members.find(m => m.PlayerID === playerId);
+      if (member) {
+        setCelebratingPlayer({ id: playerId, name: member.FirstName, score: clampedScore });
+      }
+    }
+  }, [activeScorecard]);
 
   // Save all edited scores
   const handleUpdateHoleScores = async () => {
@@ -466,18 +723,129 @@ const ScorecardPage = () => {
     }
   };
 
+  // Check if current user can remove a specific player from scorecard
+  const canRemovePlayer = (targetPlayerId: number): boolean => {
+    if (!activeScorecard) return false;
+    // Must have at least 2 members to remove someone
+    if (activeScorecard.members.length <= 1) return false;
+    // Creator can remove anyone except themselves if they're the last member
+    if (activeScorecard.CreatedByPlayerID === player.PlayerID) {
+      return true;
+    }
+    // Players can remove themselves
+    return targetPlayerId === player.PlayerID;
+  };
+
+  // Remove a player from scorecard
+  const handleRemovePlayer = async () => {
+    if (!activeScorecard || !playerToRemove) return;
+    
+    setRemovingPlayer(true);
+    try {
+      await api.removePlayerFromScorecard(
+        activeScorecard.ScorecardID,
+        playerToRemove.id,
+        player.PlayerID
+      );
+      
+      // If removing self, navigate back to scorecard list
+      if (playerToRemove.id === player.PlayerID) {
+        setShowRemovePlayerConfirm(false);
+        setPlayerToRemove(null);
+        setActiveScorecard(null);
+        await refreshPlayerScorecards();
+        navigate('/scorecard');
+      } else {
+        // Reload scorecard to show updated members
+        setShowRemovePlayerConfirm(false);
+        setPlayerToRemove(null);
+        await loadScorecardDetails(activeScorecard.ScorecardID);
+        await refreshPlayerScorecards();
+      }
+    } catch (err) {
+      console.error('Failed to remove player:', err);
+      alert('Failed to remove player from scorecard.');
+    } finally {
+      setRemovingPlayer(false);
+    }
+  };
+
   const togglePlayerSelection = (playerId: number) => {
     if (playerId === player.PlayerID) return;
     
+    // If already selected, remove them
+    if (selectedPlayers.includes(playerId)) {
+      setSelectedPlayers(prev => prev.filter(id => id !== playerId));
+      return;
+    }
+    
+    // If at max capacity, show swap dialog
+    if (selectedPlayers.length >= 4) {
+      setPendingPlayer(playerId);
+      setShowSwapDialog(true);
+      return;
+    }
+    
+    // Otherwise add player
+    setSelectedPlayers(prev => [...prev, playerId]);
+  };
+
+  const handleSwapPlayer = (playerToRemove: number) => {
+    if (playerToRemove === player.PlayerID || !pendingPlayer) return;
+    
     setSelectedPlayers(prev => {
-      if (prev.includes(playerId)) {
-        return prev.filter(id => id !== playerId);
-      }
-      if (prev.length < 4) {
-        return [...prev, playerId];
-      }
-      return prev;
+      const newPlayers = prev.filter(id => id !== playerToRemove);
+      return [...newPlayers, pendingPlayer];
     });
+    setShowSwapDialog(false);
+    setPendingPlayer(null);
+  };
+
+  const cancelSwap = () => {
+    setShowSwapDialog(false);
+    setPendingPlayer(null);
+  };
+
+  // Reset create player form
+  const resetCreatePlayerForm = () => {
+    setShowCreatePlayerForm(false);
+    setNewPlayerFirstName('');
+    setNewPlayerLastName('');
+    setNewPlayerEmail('');
+    setNewPlayerDivision('Recreational');
+    setCreatePlayerError(null);
+  };
+
+  // Create a new player
+  const handleCreatePlayer = async () => {
+    if (!newPlayerFirstName.trim() || !newPlayerLastName.trim() || !newPlayerEmail.trim()) return;
+    
+    setCreatingPlayer(true);
+    setCreatePlayerError(null);
+    try {
+      const newPlayer = await api.createPlayer({
+        firstName: newPlayerFirstName.trim(),
+        lastName: newPlayerLastName.trim(),
+        email: newPlayerEmail.trim(),
+        skillDivision: newPlayerDivision
+      });
+      
+      // Refresh players list
+      await refreshPlayers();
+      
+      // Auto-select the new player if there's room
+      if (selectedPlayers.length < 4) {
+        setSelectedPlayers(prev => [...prev, newPlayer.PlayerID]);
+      }
+      
+      // Reset and close the form
+      resetCreatePlayerForm();
+    } catch (err) {
+      console.error('Failed to create player:', err);
+      setCreatePlayerError(err instanceof Error ? err.message : 'Failed to create player');
+    } finally {
+      setCreatingPlayer(false);
+    }
   };
 
   const getPlayerTotalScore = (playerId: number) => {
@@ -772,6 +1140,20 @@ const ScorecardPage = () => {
                                   You
                                 </span>
                               )}
+                              {canRemovePlayer(member.PlayerID) && activeScorecard.members.length > 1 && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setPlayerToRemove({ id: member.PlayerID, name: member.FirstName });
+                                    setShowRemovePlayerConfirm(true);
+                                  }}
+                                  className="p-1 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 
+                                           dark:hover:text-red-400 dark:hover:bg-red-900/20 transition-all ml-1"
+                                  title={member.PlayerID === player.PlayerID ? 'Leave scorecard' : `Remove ${member.FirstName}`}
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              )}
                             </div>
                             <div className="text-sm text-gray-500 dark:text-gray-400">
                               Total: <span className="font-semibold text-emerald-600 dark:text-emerald-400">{totalScore}</span>
@@ -1031,6 +1413,9 @@ const ScorecardPage = () => {
                         </th>
                       ))}
                       <th className="text-center py-2 px-2 font-bold text-gray-900 dark:text-gray-100">Tot</th>
+                      {activeScorecard.members.length > 1 && (
+                        <th className="w-8"></th>
+                      )}
                     </tr>
                   </thead>
                   <tbody>
@@ -1066,6 +1451,24 @@ const ScorecardPage = () => {
                         <td className="text-center py-2 px-2 font-bold text-emerald-600 dark:text-emerald-400">
                           {getPlayerTotalScore(member.PlayerID)}
                         </td>
+                        {activeScorecard.members.length > 1 && canRemovePlayer(member.PlayerID) && (
+                          <td className="text-center py-2 px-1">
+                            <button
+                              onClick={() => {
+                                setPlayerToRemove({ id: member.PlayerID, name: member.FirstName });
+                                setShowRemovePlayerConfirm(true);
+                              }}
+                              className="p-1.5 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 
+                                       dark:hover:text-red-400 dark:hover:bg-red-900/20 transition-all"
+                              title={member.PlayerID === player.PlayerID ? 'Leave scorecard' : `Remove ${member.FirstName}`}
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </td>
+                        )}
+                        {activeScorecard.members.length > 1 && !canRemovePlayer(member.PlayerID) && (
+                          <td className="w-8"></td>
+                        )}
                       </tr>
                     ))}
                   </tbody>
@@ -1123,10 +1526,67 @@ const ScorecardPage = () => {
           </div>
         )}
 
-        {/* Perfect Score Celebration Overlay */}
+        {/* Remove Player Confirmation Modal */}
+        {showRemovePlayerConfirm && playerToRemove && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-sm w-full shadow-xl animate-fade-in">
+              <div className="p-6 text-center">
+                <div className="w-16 h-16 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Users className="w-8 h-8 text-orange-600 dark:text-orange-400" />
+                </div>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                  {playerToRemove.id === player.PlayerID ? 'Leave Scorecard?' : `Remove ${playerToRemove.name}?`}
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 mb-6">
+                  {playerToRemove.id === player.PlayerID 
+                    ? 'You will be removed from this scorecard. Your scores will be deleted.'
+                    : `${playerToRemove.name} will be removed from this scorecard. Their scores will be deleted.`
+                  }
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      setShowRemovePlayerConfirm(false);
+                      setPlayerToRemove(null);
+                    }}
+                    disabled={removingPlayer}
+                    className="flex-1 py-3 rounded-xl font-bold text-gray-700 dark:text-gray-300 
+                             bg-gray-200 dark:bg-slate-700 hover:bg-gray-300 dark:hover:bg-slate-600 
+                             transition-all active:scale-[0.98]"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleRemovePlayer}
+                    disabled={removingPlayer}
+                    className="flex-1 py-3 rounded-xl font-bold text-white 
+                             bg-orange-600 hover:bg-orange-700 shadow-lg
+                             transition-all active:scale-[0.98] flex items-center justify-center gap-2
+                             disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {removingPlayer ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span>Removing...</span>
+                      </>
+                    ) : (
+                      <>
+                        <X className="w-5 h-5" />
+                        <span>{playerToRemove.id === player.PlayerID ? 'Leave' : 'Remove'}</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Score Animation Overlay */}
         {celebratingPlayer && (
-          <CelebrationOverlay 
+          <ScoreAnimationOverlay 
             playerName={celebratingPlayer.name}
+            score={celebratingPlayer.score}
             onComplete={() => setCelebratingPlayer(null)}
           />
         )}
@@ -1238,110 +1698,377 @@ const ScorecardPage = () => {
 
       {/* New Scorecard Modal */}
       {showNewScorecardModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="card max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-100 dark:border-slate-700">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="card max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+            {/* Header */}
+            <div className="p-5 border-b border-gray-100 dark:border-slate-700 bg-gradient-to-r from-emerald-500/5 to-teal-500/5">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">New Round</h2>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
+                    <Disc3 className="w-5 h-5 text-white" />
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">New Round</h2>
+                </div>
                 <button
-                  onClick={() => setShowNewScorecardModal(false)}
+                  onClick={() => {
+                    setShowNewScorecardModal(false);
+                    setEventSectionExpanded(true);
+                    setPlayerSearchQuery('');
+                  }}
                   className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-5 h-5 text-gray-500" />
                 </button>
               </div>
             </div>
 
-            <div className="p-6 space-y-6">
-              {/* Event Selection */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                  Select Event
-                </label>
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {events.map(event => {
-                    const eventImage = getEventImage(event.EventID);
-                    return (
+            {/* Content - Two Column Layout */}
+            <div className="flex-1 overflow-y-auto p-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                {/* Left Column - Event Selection */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                      <Calendar className="w-4 h-4 text-emerald-600" />
+                      Event
+                    </label>
+                    {selectedEventId && (
                       <button
-                        key={event.EventID}
-                        onClick={() => setSelectedEventId(event.EventID)}
-                        className={`w-full p-3 rounded-xl text-left transition-all flex items-center space-x-3 ${
-                          selectedEventId === event.EventID
-                            ? 'bg-emerald-50 dark:bg-emerald-900/20 border-2 border-emerald-500 shadow-md'
-                            : 'bg-gray-50 dark:bg-slate-800 border-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600'
-                        }`}
+                        onClick={() => setEventSectionExpanded(!eventSectionExpanded)}
+                        className="text-xs text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
                       >
-                        <div className="w-12 h-12 rounded-lg overflow-hidden shadow shrink-0">
-                          <img 
-                            src={eventImage} 
-                            alt={event.Name}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div>
-                          <div className="font-semibold text-gray-900 dark:text-gray-100">{event.Name}</div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">
-                            {new Date(event.EventDate).toLocaleDateString()} • {event.HoleCount} holes
-                          </div>
-                        </div>
+                        {eventSectionExpanded ? 'Collapse' : 'Change'}
+                        {eventSectionExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
                       </button>
-                    );
-                  })}
-                </div>
-              </div>
+                    )}
+                  </div>
 
-              {/* Player Selection */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                  <Users className="w-4 h-4 inline mr-2" />
-                  Select Players (up to 4)
-                </label>
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {players.map((p, idx) => (
+                  {/* Selected Event Preview (shown when collapsed) */}
+                  {selectedEventId && !eventSectionExpanded && (
                     <button
-                      key={p.PlayerID}
-                      onClick={() => togglePlayerSelection(p.PlayerID)}
-                      disabled={p.PlayerID === player.PlayerID}
-                      className={`w-full p-3 rounded-xl text-left transition-all flex items-center justify-between ${
-                        selectedPlayers.includes(p.PlayerID)
-                          ? 'bg-emerald-50 dark:bg-emerald-900/20 border-2 border-emerald-500'
-                          : 'bg-gray-50 dark:bg-slate-800 border-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600'
-                      } ${p.PlayerID === player.PlayerID ? 'opacity-75' : ''}`}
+                      onClick={() => setEventSectionExpanded(true)}
+                      className="w-full p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border-2 border-emerald-500 
+                               text-left transition-all hover:shadow-md flex items-center gap-3"
                     >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${PLAYER_COLORS[idx % PLAYER_COLORS.length]} 
-                                      flex items-center justify-center text-white font-bold`}>
-                          {p.FirstName.charAt(0)}
-                        </div>
-                        <div>
-                          <span className="font-medium text-gray-900 dark:text-gray-100">
-                            {p.FirstName} {p.LastName}
-                          </span>
-                          {p.PlayerID === player.PlayerID && (
-                            <span className="ml-2 text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 px-2 py-1 rounded-full">
-                              You
-                            </span>
-                          )}
-                          <div className="text-sm text-gray-500">{p.SkillDivision}</div>
-                        </div>
-                      </div>
-                      {selectedPlayers.includes(p.PlayerID) && (
-                        <Check className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                      )}
+                      {(() => {
+                        const selectedEvent = events.find(e => e.EventID === selectedEventId);
+                        if (!selectedEvent) return null;
+                        const eventImage = getEventImage(selectedEvent.EventID);
+                        return (
+                          <>
+                            <div className="w-12 h-12 rounded-lg overflow-hidden shadow shrink-0 ring-2 ring-emerald-500/30">
+                              <img src={eventImage} alt={selectedEvent.Name} className="w-full h-full object-cover" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="font-semibold text-gray-900 dark:text-gray-100 truncate">{selectedEvent.Name}</div>
+                              <div className="text-sm text-emerald-600 dark:text-emerald-400">
+                                {new Date(selectedEvent.EventDate).toLocaleDateString()} • {selectedEvent.HoleCount} holes
+                              </div>
+                            </div>
+                            <Check className="w-5 h-5 text-emerald-600 shrink-0" />
+                          </>
+                        );
+                      })()}
                     </button>
-                  ))}
+                  )}
+
+                  {/* Event List (shown when expanded) */}
+                  {eventSectionExpanded && (
+                    <div className="space-y-2 max-h-64 overflow-y-auto pr-1 scrollbar-thin">
+                      {events.map(event => {
+                        const eventImage = getEventImage(event.EventID);
+                        const isSelected = selectedEventId === event.EventID;
+                        return (
+                          <button
+                            key={event.EventID}
+                            onClick={() => {
+                              setSelectedEventId(event.EventID);
+                              setEventSectionExpanded(false);
+                            }}
+                            className={`w-full p-3 rounded-xl text-left transition-all flex items-center gap-3 ${
+                              isSelected
+                                ? 'bg-emerald-50 dark:bg-emerald-900/20 border-2 border-emerald-500 shadow-md'
+                                : 'bg-gray-50 dark:bg-slate-800 border-2 border-transparent hover:border-emerald-300 dark:hover:border-emerald-700 hover:bg-gray-100 dark:hover:bg-slate-700'
+                            }`}
+                          >
+                            <div className="w-11 h-11 rounded-lg overflow-hidden shadow shrink-0">
+                              <img src={eventImage} alt={event.Name} className="w-full h-full object-cover" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm truncate">{event.Name}</div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400">
+                                {new Date(event.EventDate).toLocaleDateString()} • {event.HoleCount} holes
+                              </div>
+                            </div>
+                            {isSelected && <Check className="w-4 h-4 text-emerald-600 shrink-0" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
-                <p className="text-sm text-gray-500 mt-2">
-                  {selectedPlayers.length} player{selectedPlayers.length !== 1 ? 's' : ''} selected
-                </p>
+
+                {/* Right Column - Player Selection */}
+                <div className="space-y-3">
+                  <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                    <Users className="w-4 h-4 text-emerald-600" />
+                    Players
+                    <span className={`ml-auto text-xs font-medium px-2 py-0.5 rounded-full ${
+                      selectedPlayers.length >= 4 
+                        ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300' 
+                        : 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400'
+                    }`}>
+                      {selectedPlayers.length}/4
+                    </span>
+                  </label>
+
+                  {/* Selected Players Chips */}
+                  {selectedPlayers.length > 0 && (
+                    <div className="flex flex-wrap gap-2 p-3 bg-emerald-50/50 dark:bg-emerald-900/10 rounded-xl border border-emerald-100 dark:border-emerald-900/30">
+                      {selectedPlayers.map(playerId => {
+                        const p = players.find(pl => pl.PlayerID === playerId);
+                        if (!p) return null;
+                        const isOwner = playerId === player.PlayerID;
+                        return (
+                          <div
+                            key={playerId}
+                            className={`inline-flex items-center gap-1.5 pl-2 pr-1 py-1 rounded-full text-sm font-medium transition-all ${
+                              isOwner
+                                ? 'bg-emerald-600 text-white'
+                                : 'bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-200 shadow-sm border border-gray-200 dark:border-slate-600'
+                            }`}
+                          >
+                            <span className="truncate max-w-[100px]">{p.FirstName}</span>
+                            {isOwner ? (
+                              <span className="text-xs bg-white/20 px-1.5 py-0.5 rounded-full">You</span>
+                            ) : (
+                              <button
+                                onClick={() => togglePlayerSelection(playerId)}
+                                className="p-0.5 hover:bg-gray-100 dark:hover:bg-slate-600 rounded-full transition-colors"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Search Input */}
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Search players..."
+                      value={playerSearchQuery}
+                      onChange={(e) => setPlayerSearchQuery(e.target.value)}
+                      className="w-full pl-9 pr-4 py-2.5 rounded-xl border-2 border-gray-200 dark:border-slate-600 
+                               bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100
+                               focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all
+                               placeholder:text-gray-400 dark:placeholder:text-gray-500 text-sm"
+                    />
+                    {playerSearchQuery && (
+                      <button
+                        onClick={() => setPlayerSearchQuery('')}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-full"
+                      >
+                        <X className="w-3.5 h-3.5 text-gray-400" />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Player List */}
+                  <div className="space-y-1.5 max-h-52 overflow-y-auto pr-1 scrollbar-thin">
+                    {(() => {
+                      const searchLower = playerSearchQuery.toLowerCase();
+                      const filteredPlayers = players.filter(p => {
+                        // Always show owner at top
+                        if (p.PlayerID === player.PlayerID) return true;
+                        // Filter by search
+                        if (!playerSearchQuery) return true;
+                        return (
+                          p.FirstName.toLowerCase().includes(searchLower) ||
+                          p.LastName.toLowerCase().includes(searchLower)
+                        );
+                      });
+
+                      // Sort: owner first, then selected, then others
+                      const sortedPlayers = [...filteredPlayers].sort((a, b) => {
+                        if (a.PlayerID === player.PlayerID) return -1;
+                        if (b.PlayerID === player.PlayerID) return 1;
+                        const aSelected = selectedPlayers.includes(a.PlayerID);
+                        const bSelected = selectedPlayers.includes(b.PlayerID);
+                        if (aSelected && !bSelected) return -1;
+                        if (!aSelected && bSelected) return 1;
+                        return 0;
+                      });
+
+                      if (sortedPlayers.length === 0) {
+                        return (
+                          <div className="text-center py-6 text-gray-500 dark:text-gray-400 text-sm">
+                            No players found matching "{playerSearchQuery}"
+                          </div>
+                        );
+                      }
+
+                      return sortedPlayers.map((p) => {
+                        const isSelected = selectedPlayers.includes(p.PlayerID);
+                        const isOwner = p.PlayerID === player.PlayerID;
+                        const playerIndex = players.findIndex(pl => pl.PlayerID === p.PlayerID);
+
+                        return (
+                          <button
+                            key={p.PlayerID}
+                            onClick={() => togglePlayerSelection(p.PlayerID)}
+                            disabled={isOwner}
+                            className={`w-full p-2.5 rounded-xl text-left transition-all flex items-center justify-between group ${
+                              isSelected
+                                ? 'bg-emerald-50 dark:bg-emerald-900/20 border-2 border-emerald-400 dark:border-emerald-600'
+                                : 'bg-gray-50 dark:bg-slate-800 border-2 border-transparent hover:border-gray-300 dark:hover:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700'
+                            } ${isOwner ? 'cursor-default' : 'cursor-pointer'}`}
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${PLAYER_COLORS[playerIndex % PLAYER_COLORS.length]} 
+                                            flex items-center justify-center text-white text-sm font-bold shrink-0`}>
+                                {p.FirstName.charAt(0)}
+                              </div>
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium text-gray-900 dark:text-gray-100 text-sm truncate">
+                                    {p.FirstName} {p.LastName}
+                                  </span>
+                                  {isOwner && (
+                                    <span className="shrink-0 text-[10px] bg-emerald-600 text-white px-1.5 py-0.5 rounded-full font-semibold">
+                                      YOU
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400">{p.SkillDivision}</div>
+                              </div>
+                            </div>
+                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
+                              isSelected 
+                                ? 'bg-emerald-500 border-emerald-500' 
+                                : 'border-gray-300 dark:border-slate-500 group-hover:border-emerald-400'
+                            }`}>
+                              {isSelected && <Check className="w-3 h-3 text-white" />}
+                            </div>
+                          </button>
+                        );
+                      });
+                    })()}
+                  </div>
+
+                  {/* Create New Player Button/Form */}
+                  {!showCreatePlayerForm ? (
+                    <button
+                      onClick={() => setShowCreatePlayerForm(true)}
+                      className="w-full py-2.5 rounded-xl border-2 border-dashed border-gray-300 dark:border-slate-600
+                               text-gray-600 dark:text-gray-400 text-sm font-medium
+                               hover:border-emerald-400 hover:text-emerald-600 dark:hover:border-emerald-500 dark:hover:text-emerald-400
+                               transition-all flex items-center justify-center gap-2"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Add New Player</span>
+                    </button>
+                  ) : (
+                    <div className="p-4 rounded-xl bg-blue-50/50 dark:bg-blue-900/10 border-2 border-blue-200 dark:border-blue-800/50 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">New Player</h4>
+                        <button
+                          onClick={resetCreatePlayerForm}
+                          className="p-1 hover:bg-gray-200 dark:hover:bg-slate-700 rounded-full transition-colors"
+                        >
+                          <X className="w-4 h-4 text-gray-500" />
+                        </button>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-2">
+                        <input
+                          type="text"
+                          placeholder="First Name"
+                          value={newPlayerFirstName}
+                          onChange={(e) => setNewPlayerFirstName(e.target.value)}
+                          className="px-3 py-2 rounded-lg border-2 border-gray-200 dark:border-slate-600 
+                                   bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 text-sm
+                                   focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none transition-all
+                                   placeholder:text-gray-400"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Last Name"
+                          value={newPlayerLastName}
+                          onChange={(e) => setNewPlayerLastName(e.target.value)}
+                          className="px-3 py-2 rounded-lg border-2 border-gray-200 dark:border-slate-600 
+                                   bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 text-sm
+                                   focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none transition-all
+                                   placeholder:text-gray-400"
+                        />
+                      </div>
+                      
+                      <input
+                        type="email"
+                        placeholder="Email"
+                        value={newPlayerEmail}
+                        onChange={(e) => setNewPlayerEmail(e.target.value)}
+                        className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 dark:border-slate-600 
+                                 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 text-sm
+                                 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none transition-all
+                                 placeholder:text-gray-400"
+                      />
+                      
+                      <select
+                        value={newPlayerDivision}
+                        onChange={(e) => setNewPlayerDivision(e.target.value)}
+                        className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 dark:border-slate-600 
+                                 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 text-sm
+                                 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none transition-all"
+                      >
+                        <option value="Recreational">Recreational</option>
+                        <option value="Intermediate">Intermediate</option>
+                        <option value="Advanced">Advanced</option>
+                        <option value="Professional">Professional</option>
+                      </select>
+
+                      {createPlayerError && (
+                        <div className="p-2 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                          <p className="text-xs text-red-600 dark:text-red-400">{createPlayerError}</p>
+                        </div>
+                      )}
+
+                      <button
+                        onClick={handleCreatePlayer}
+                        disabled={!newPlayerFirstName.trim() || !newPlayerLastName.trim() || !newPlayerEmail.trim() || creatingPlayer}
+                        className="w-full py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 
+                                 bg-blue-600 text-white shadow-md
+                                 hover:bg-blue-700 active:scale-[0.98] transition-all
+                                 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {creatingPlayer ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span>Creating...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Plus className="w-4 h-4" />
+                            <span>Create Player</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
-            <div className="p-6 border-t border-gray-100 dark:border-slate-700">
+            {/* Footer */}
+            <div className="p-5 border-t border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/50">
               <button
                 onClick={handleCreateScorecard}
                 disabled={!selectedEventId || selectedPlayers.length === 0 || creating}
-                className="w-full py-4 rounded-xl text-lg font-bold flex items-center justify-center space-x-2 
+                className="w-full py-3.5 rounded-xl text-base font-bold flex items-center justify-center gap-2 
                          bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg
                          hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all
                          disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
@@ -1357,6 +2084,94 @@ const ScorecardPage = () => {
                     <span>Start Round</span>
                   </>
                 )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Swap Player Dialog */}
+      {showSwapDialog && pendingPlayer && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+          <div className="card max-w-sm w-full overflow-hidden animate-scale-in">
+            {/* Header */}
+            <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-100 dark:border-amber-900/30">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
+                  <ArrowLeftRight className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900 dark:text-gray-100">Card is Full</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Maximum 4 players per card</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-4 space-y-3">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Swap out a player to add{' '}
+                <span className="font-semibold text-gray-900 dark:text-gray-100">
+                  {players.find(p => p.PlayerID === pendingPlayer)?.FirstName}
+                </span>
+                :
+              </p>
+
+              <div className="space-y-2">
+                {selectedPlayers.map(playerId => {
+                  const p = players.find(pl => pl.PlayerID === playerId);
+                  if (!p) return null;
+                  const isOwner = playerId === player.PlayerID;
+                  const playerIndex = players.findIndex(pl => pl.PlayerID === playerId);
+
+                  return (
+                    <button
+                      key={playerId}
+                      onClick={() => !isOwner && handleSwapPlayer(playerId)}
+                      disabled={isOwner}
+                      className={`w-full p-3 rounded-xl text-left transition-all flex items-center justify-between ${
+                        isOwner
+                          ? 'bg-gray-100 dark:bg-slate-800 opacity-60 cursor-not-allowed'
+                          : 'bg-white dark:bg-slate-700 border-2 border-gray-200 dark:border-slate-600 hover:border-amber-400 dark:hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${PLAYER_COLORS[playerIndex % PLAYER_COLORS.length]} 
+                                      flex items-center justify-center text-white font-bold text-sm`}>
+                          {p.FirstName.charAt(0)}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-gray-900 dark:text-gray-100">
+                              {p.FirstName} {p.LastName}
+                            </span>
+                            {isOwner && (
+                              <span className="text-[10px] bg-gray-200 dark:bg-slate-600 text-gray-600 dark:text-gray-300 px-1.5 py-0.5 rounded-full">
+                                Can't swap
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xs text-gray-500">{p.SkillDivision}</div>
+                        </div>
+                      </div>
+                      {!isOwner && (
+                        <ArrowLeftRight className="w-4 h-4 text-gray-400 group-hover:text-amber-500" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 border-t border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50">
+              <button
+                onClick={cancelSwap}
+                className="w-full py-2.5 rounded-xl font-semibold text-gray-700 dark:text-gray-300 
+                         bg-white dark:bg-slate-700 border-2 border-gray-200 dark:border-slate-600
+                         hover:bg-gray-100 dark:hover:bg-slate-600 transition-colors"
+              >
+                Cancel
               </button>
             </div>
           </div>

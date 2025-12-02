@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import * as api from '../utils/api';
+import type { EventLimitFilter } from '../utils/api';
 
 // Demo player - hardcoded for simplified demo (Player 1 from database)
 export const DEMO_PLAYER: api.Player = {
@@ -9,6 +10,9 @@ export const DEMO_PLAYER: api.Player = {
   Email: 'mike.anderson@email.com',
   SkillDivision: 'Advanced',
 };
+
+// Re-export for convenience
+export type { EventLimitFilter } from '../utils/api';
 
 interface DataContextType {
   // Demo player
@@ -28,6 +32,10 @@ interface DataContextType {
   holeDifficulty: api.HoleDifficulty[];
   basketStats: api.BasketStats[];
   
+  // Event filter for stats
+  statsEventFilter: EventLimitFilter;
+  setStatsEventFilter: (filter: EventLimitFilter) => void;
+  
   // Loading states
   loading: boolean;
   error: string | null;
@@ -38,11 +46,12 @@ interface DataContextType {
   refreshPlayerHistory: () => Promise<void>;
   refreshPlayerScorecards: () => Promise<void>;
   refreshPlayers: () => Promise<void>;
-  refreshHotRounds: () => Promise<void>;
-  refreshPodiumStats: () => Promise<void>;
-  refreshTopCards: () => Promise<void>;
-  refreshHoleDifficulty: () => Promise<void>;
-  refreshBasketStats: () => Promise<void>;
+  refreshAllStats: (eventLimit?: EventLimitFilter) => Promise<void>;
+  refreshHotRounds: (eventLimit?: EventLimitFilter) => Promise<void>;
+  refreshPodiumStats: (eventLimit?: EventLimitFilter) => Promise<void>;
+  refreshTopCards: (eventLimit?: EventLimitFilter) => Promise<void>;
+  refreshHoleDifficulty: (eventLimit?: EventLimitFilter) => Promise<void>;
+  refreshBasketStats: (eventLimit?: EventLimitFilter) => Promise<void>;
   
   // Scorecard functions
   createNewScorecard: (eventId: number) => Promise<number | null>;
@@ -86,6 +95,9 @@ export const DataProvider = ({ children }: DataProviderProps) => {
   const [holeDifficulty, setHoleDifficulty] = useState<api.HoleDifficulty[]>([]);
   const [basketStats, setBasketStats] = useState<api.BasketStats[]>([]);
   
+  // Event filter for stats - defaults to 'latest' (most recent event)
+  const [statsEventFilter, setStatsEventFilter] = useState<EventLimitFilter>('latest');
+  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -98,6 +110,9 @@ export const DataProvider = ({ children }: DataProviderProps) => {
     setLoading(true);
     setError(null);
     try {
+      // Default to 'latest' for stats on initial load
+      const defaultFilter: EventLimitFilter = 'latest';
+      
       const [
         eventsData,
         playersData,
@@ -112,14 +127,14 @@ export const DataProvider = ({ children }: DataProviderProps) => {
       ] = await Promise.all([
         api.getEvents(),
         api.getPlayers(),
-        api.getLeaderboard(),
+        api.getLeaderboard(undefined, defaultFilter),
         api.getPlayerHistory(DEMO_PLAYER.PlayerID),
         api.getPlayerScorecards(DEMO_PLAYER.PlayerID),
-        api.getHotRounds(),
-        api.getPodiumStats(),
-        api.getTopCards(),
-        api.getHoleDifficulty(),
-        api.getBasketStats(),
+        api.getHotRounds(defaultFilter),
+        api.getPodiumStats(defaultFilter),
+        api.getTopCards(defaultFilter),
+        api.getHoleDifficulty(defaultFilter),
+        api.getBasketStats(defaultFilter),
       ]);
       
       setEvents(eventsData);
@@ -160,7 +175,7 @@ export const DataProvider = ({ children }: DataProviderProps) => {
 
   const refreshLeaderboard = async (division?: string) => {
     try {
-      const data = await api.getLeaderboard(division);
+      const data = await api.getLeaderboard(division, statsEventFilter);
       setLeaderboard(data);
     } catch (err) {
       console.error('Failed to refresh leaderboard:', err);
@@ -185,48 +200,84 @@ export const DataProvider = ({ children }: DataProviderProps) => {
     }
   };
 
-  const refreshHotRounds = async () => {
+  const refreshHotRounds = async (eventLimit?: EventLimitFilter) => {
     try {
-      const data = await api.getHotRounds();
+      const filter = eventLimit ?? statsEventFilter;
+      const data = await api.getHotRounds(filter);
       setHotRounds(data);
     } catch (err) {
       console.error('Failed to refresh hot rounds:', err);
     }
   };
 
-  const refreshPodiumStats = async () => {
+  const refreshPodiumStats = async (eventLimit?: EventLimitFilter) => {
     try {
-      const data = await api.getPodiumStats();
+      const filter = eventLimit ?? statsEventFilter;
+      const data = await api.getPodiumStats(filter);
       setPodiumStats(data);
     } catch (err) {
       console.error('Failed to refresh podium stats:', err);
     }
   };
 
-  const refreshTopCards = async () => {
+  const refreshTopCards = async (eventLimit?: EventLimitFilter) => {
     try {
-      const data = await api.getTopCards();
+      const filter = eventLimit ?? statsEventFilter;
+      const data = await api.getTopCards(filter);
       setTopCards(data);
     } catch (err) {
       console.error('Failed to refresh top cards:', err);
     }
   };
 
-  const refreshHoleDifficulty = async () => {
+  const refreshHoleDifficulty = async (eventLimit?: EventLimitFilter) => {
     try {
-      const data = await api.getHoleDifficulty();
+      const filter = eventLimit ?? statsEventFilter;
+      const data = await api.getHoleDifficulty(filter);
       setHoleDifficulty(data);
     } catch (err) {
       console.error('Failed to refresh hole difficulty:', err);
     }
   };
 
-  const refreshBasketStats = async () => {
+  const refreshBasketStats = async (eventLimit?: EventLimitFilter) => {
     try {
-      const data = await api.getBasketStats();
+      const filter = eventLimit ?? statsEventFilter;
+      const data = await api.getBasketStats(filter);
       setBasketStats(data);
     } catch (err) {
       console.error('Failed to refresh basket stats:', err);
+    }
+  };
+
+  // Refresh all stats with a specific event filter
+  const refreshAllStats = async (eventLimit?: EventLimitFilter) => {
+    const filter = eventLimit ?? statsEventFilter;
+    try {
+      const [
+        leaderboardData,
+        hotRoundsData,
+        podiumStatsData,
+        topCardsData,
+        holeDifficultyData,
+        basketStatsData,
+      ] = await Promise.all([
+        api.getLeaderboard(undefined, filter),
+        api.getHotRounds(filter),
+        api.getPodiumStats(filter),
+        api.getTopCards(filter),
+        api.getHoleDifficulty(filter),
+        api.getBasketStats(filter),
+      ]);
+      
+      setLeaderboard(leaderboardData);
+      setHotRounds(hotRoundsData);
+      setPodiumStats(podiumStatsData);
+      setTopCards(topCardsData);
+      setHoleDifficulty(holeDifficultyData);
+      setBasketStats(basketStatsData);
+    } catch (err) {
+      console.error('Failed to refresh all stats:', err);
     }
   };
 
@@ -266,23 +317,28 @@ export const DataProvider = ({ children }: DataProviderProps) => {
     scores: { playerId: number; strokes: number }[]
   ): Promise<boolean> => {
     try {
-      // Pad scores array to 4 players
-      const paddedScores = [...scores];
-      while (paddedScores.length < 4) {
-        paddedScores.push({ playerId: scores[0]?.playerId || 1, strokes: 0 });
+      // Build request with only the players that exist (minimum 2, maximum 4)
+      const requestData: api.InsertHoleScoresData = {
+        holeNumber,
+        player1Id: scores[0].playerId,
+        player1Score: scores[0].strokes,
+        player2Id: scores[1].playerId,
+        player2Score: scores[1].strokes,
+      };
+      
+      // Only include player 3 if they exist
+      if (scores[2]) {
+        requestData.player3Id = scores[2].playerId;
+        requestData.player3Score = scores[2].strokes;
       }
       
-      await api.insertHoleScores(scorecardId, {
-        holeNumber,
-        player1Id: paddedScores[0].playerId,
-        player1Score: paddedScores[0].strokes,
-        player2Id: paddedScores[1].playerId,
-        player2Score: paddedScores[1].strokes,
-        player3Id: paddedScores[2].playerId,
-        player3Score: paddedScores[2].strokes,
-        player4Id: paddedScores[3].playerId,
-        player4Score: paddedScores[3].strokes,
-      });
+      // Only include player 4 if they exist
+      if (scores[3]) {
+        requestData.player4Id = scores[3].playerId;
+        requestData.player4Score = scores[3].strokes;
+      }
+      
+      await api.insertHoleScores(scorecardId, requestData);
       
       await refreshPlayerScorecards();
       await refreshLeaderboard();
@@ -323,6 +379,8 @@ export const DataProvider = ({ children }: DataProviderProps) => {
     topCards,
     holeDifficulty,
     basketStats,
+    statsEventFilter,
+    setStatsEventFilter,
     loading,
     error,
     refreshEvents,
@@ -330,6 +388,7 @@ export const DataProvider = ({ children }: DataProviderProps) => {
     refreshLeaderboard,
     refreshPlayerHistory,
     refreshPlayerScorecards,
+    refreshAllStats,
     refreshHotRounds,
     refreshPodiumStats,
     refreshTopCards,

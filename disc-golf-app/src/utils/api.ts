@@ -68,9 +68,14 @@ export interface LeaderboardEntry {
   DivisionRank: number;
 }
 
-export async function getLeaderboard(division?: string): Promise<LeaderboardEntry[]> {
-  const params = division ? `?division=${encodeURIComponent(division)}` : '';
-  return fetchApi<LeaderboardEntry[]>(`/leaderboard${params}`);
+export type EventLimitFilter = 'latest' | 'all' | number;
+
+export async function getLeaderboard(division?: string, eventLimit: EventLimitFilter = 'latest'): Promise<LeaderboardEntry[]> {
+  const params = new URLSearchParams();
+  if (division) params.set('division', division);
+  params.set('eventLimit', String(eventLimit));
+  const queryString = params.toString();
+  return fetchApi<LeaderboardEntry[]>(`/leaderboard${queryString ? '?' + queryString : ''}`);
 }
 
 export interface PlayerHistory {
@@ -104,8 +109,8 @@ export interface HotRound {
   BadgeType: string;
 }
 
-export async function getHotRounds(): Promise<HotRound[]> {
-  const result = await fetchApi<HotRound[] | { _dev_warning: string; data: HotRound[] }>('/stats/hot-rounds');
+export async function getHotRounds(eventLimit: EventLimitFilter = 'latest'): Promise<HotRound[]> {
+  const result = await fetchApi<HotRound[] | { _dev_warning: string; data: HotRound[] }>(`/stats/hot-rounds?eventLimit=${eventLimit}`);
   if ('_dev_warning' in result) {
     console.warn('[DEV]', result._dev_warning);
     return result.data;
@@ -122,8 +127,8 @@ export interface PodiumStats {
   PodiumPercentage: number;
 }
 
-export async function getPodiumStats(): Promise<PodiumStats[]> {
-  const result = await fetchApi<PodiumStats[] | { _dev_warning: string; data: PodiumStats[] }>('/stats/podium');
+export async function getPodiumStats(eventLimit: EventLimitFilter = 'latest'): Promise<PodiumStats[]> {
+  const result = await fetchApi<PodiumStats[] | { _dev_warning: string; data: PodiumStats[] }>(`/stats/podium?eventLimit=${eventLimit}`);
   if ('_dev_warning' in result) {
     console.warn('[DEV]', result._dev_warning);
     return result.data;
@@ -133,6 +138,7 @@ export async function getPodiumStats(): Promise<PodiumStats[]> {
 
 // Top Cards - Best group scores per event
 export interface TopCard {
+  ScorecardID: number;
   EventName: string;
   EventDate: string;
   CardRank: number;
@@ -143,8 +149,8 @@ export interface TopCard {
   Players: string;
 }
 
-export async function getTopCards(): Promise<TopCard[]> {
-  const result = await fetchApi<TopCard[] | { _dev_warning: string; data: TopCard[] }>('/stats/top-cards');
+export async function getTopCards(eventLimit: EventLimitFilter = 'latest'): Promise<TopCard[]> {
+  const result = await fetchApi<TopCard[] | { _dev_warning: string; data: TopCard[] }>(`/stats/top-cards?eventLimit=${eventLimit}`);
   if ('_dev_warning' in result) {
     console.warn('[DEV]', result._dev_warning);
     return result.data;
@@ -168,8 +174,8 @@ export interface HoleDifficulty {
   SuccessRatePercent: number;
 }
 
-export async function getHoleDifficulty(): Promise<HoleDifficulty[]> {
-  const result = await fetchApi<HoleDifficulty[] | { _dev_warning: string; data: HoleDifficulty[] }>('/stats/hole-difficulty');
+export async function getHoleDifficulty(eventLimit: EventLimitFilter = 'latest'): Promise<HoleDifficulty[]> {
+  const result = await fetchApi<HoleDifficulty[] | { _dev_warning: string; data: HoleDifficulty[] }>(`/stats/hole-difficulty?eventLimit=${eventLimit}`);
   if ('_dev_warning' in result) {
     console.warn('[DEV]', result._dev_warning);
     return result.data;
@@ -194,13 +200,72 @@ export interface BasketStats {
   DifficultyRank: number;
 }
 
-export async function getBasketStats(): Promise<BasketStats[]> {
-  const result = await fetchApi<BasketStats[] | { _dev_warning: string; data: BasketStats[] }>('/stats/basket-stats');
+export async function getBasketStats(eventLimit: EventLimitFilter = 'latest'): Promise<BasketStats[]> {
+  const result = await fetchApi<BasketStats[] | { _dev_warning: string; data: BasketStats[] }>(`/stats/basket-stats?eventLimit=${eventLimit}`);
   if ('_dev_warning' in result) {
     console.warn('[DEV]', result._dev_warning);
     return result.data;
   }
   return result;
+}
+
+// Card Details - Detailed card breakdown for drill-down
+export interface CardDetailsMember {
+  PlayerID: number;
+  FirstName: string;
+  LastName: string;
+  SkillDivision: string;
+  MemberPosition: number;
+  PlayerTotal: number;
+}
+
+export interface CardDetailsScore {
+  HoleNumber: number;
+  PlayerID: number;
+  Strokes: number;
+  FirstName: string;
+  LastName: string;
+}
+
+export interface CardDetails {
+  card: {
+    ScorecardID: number;
+    EventID: number;
+    EventName: string;
+    EventDate: string;
+    HoleCount: number;
+    CardTotal: number;
+  };
+  members: CardDetailsMember[];
+  scores: CardDetailsScore[];
+  bestHole: { hole: number; total: number };
+  worstHole: { hole: number; total: number };
+  compareScores?: {
+    playerId: number;
+    scores: { HoleNumber: number; Strokes: number; ScorecardID: number }[];
+    total: number;
+  };
+}
+
+export async function getCardDetails(scorecardId: number, comparePlayerId?: number): Promise<CardDetails> {
+  const params = new URLSearchParams();
+  if (comparePlayerId) params.set('playerId', String(comparePlayerId));
+  const queryString = params.toString();
+  return fetchApi<CardDetails>(`/stats/card-details/${scorecardId}${queryString ? '?' + queryString : ''}`);
+}
+
+// ============================================
+// LAYOUTS
+// ============================================
+
+export interface Layout {
+  LayoutID: number;
+  HoleCount: number;
+  TotalDistance: number;
+}
+
+export async function getLayouts(): Promise<Layout[]> {
+  return fetchApi<Layout[]>('/layouts');
 }
 
 // ============================================
@@ -220,6 +285,16 @@ export async function getEvents(): Promise<Event[]> {
 
 export async function getEvent(eventId: number): Promise<Event> {
   return fetchApi<Event>(`/events/${eventId}`);
+}
+
+export async function createEvent(data: {
+  name: string;
+  layoutId?: number;
+}): Promise<{ NewEventID: number }> {
+  return fetchApi<{ NewEventID: number }>('/events', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
 }
 
 export interface EventHoleStats {
@@ -263,6 +338,19 @@ export interface EventSummary {
 
 export async function getEventsSummary(): Promise<EventSummary[]> {
   return fetchApi<EventSummary[]>('/events/summary');
+}
+
+export async function deleteEvent(eventId: number, confirmDelete: boolean = true): Promise<{ success: boolean }> {
+  return fetchApi<{ success: boolean }>(`/events/${eventId}`, {
+    method: 'DELETE',
+    body: JSON.stringify({ confirmDelete }),
+  });
+}
+
+export async function generateMockData(eventId: number): Promise<{ success: boolean; eventId: number }> {
+  return fetchApi<{ success: boolean; eventId: number }>(`/events/${eventId}/generate-mock-data`, {
+    method: 'POST',
+  });
 }
 
 // ============================================
@@ -339,19 +427,32 @@ export async function addScorecardMembers(
   });
 }
 
+export async function removePlayerFromScorecard(
+  scorecardId: number,
+  playerId: number,
+  requestingPlayerId: number
+): Promise<{ success: boolean }> {
+  return fetchApi<{ success: boolean }>(`/scorecards/${scorecardId}/members/${playerId}`, {
+    method: 'DELETE',
+    body: JSON.stringify({ requestingPlayerId }),
+  });
+}
+
+export interface InsertHoleScoresData {
+  holeNumber: number;
+  player1Id: number;
+  player1Score: number;
+  player2Id: number;
+  player2Score: number;
+  player3Id?: number;
+  player3Score?: number;
+  player4Id?: number;
+  player4Score?: number;
+}
+
 export async function insertHoleScores(
   scorecardId: number,
-  data: {
-    holeNumber: number;
-    player1Id: number;
-    player1Score: number;
-    player2Id: number;
-    player2Score: number;
-    player3Id: number;
-    player3Score: number;
-    player4Id: number;
-    player4Score: number;
-  }
+  data: InsertHoleScoresData
 ): Promise<{ Result: string }> {
   return fetchApi<{ Result: string }>(`/scorecards/${scorecardId}/scores`, {
     method: 'POST',
