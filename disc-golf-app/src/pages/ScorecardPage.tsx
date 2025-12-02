@@ -1068,22 +1068,24 @@ const ScorecardPage = () => {
           </div>
         </div>
 
-        {/* Main Content - Swipeable Hole View */}
-        <div 
-          ref={containerRef}
-          className="flex-1 overflow-hidden bg-gray-50 dark:bg-slate-900"
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-        >
+        {/* Main Content Area - Split Layout on Desktop */}
+        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden bg-gray-50 dark:bg-slate-900">
+          {/* Left: Scoring Area */}
           <div 
-            className={`
-              p-4 transition-all duration-200 ease-out
-              ${slideDirection === 'left' ? '-translate-x-8 opacity-0' : ''}
-              ${slideDirection === 'right' ? 'translate-x-8 opacity-0' : ''}
-              ${!slideDirection ? 'translate-x-0 opacity-100' : ''}
-            `}
+            ref={containerRef}
+            className="flex-1 lg:w-3/5 overflow-y-auto"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
           >
+            <div 
+              className={`
+                p-4 transition-all duration-200 ease-out
+                ${slideDirection === 'left' ? '-translate-x-8 opacity-0' : ''}
+                ${slideDirection === 'right' ? 'translate-x-8 opacity-0' : ''}
+                ${!slideDirection ? 'translate-x-0 opacity-100' : ''}
+              `}
+            >
             {/* Hole Number Header with Navigation */}
             <div className="flex items-center justify-between mb-6">
               <button
@@ -1397,11 +1399,95 @@ const ScorecardPage = () => {
                 )}
               </div>
             )}
+            </div>
+          </div>
+
+          {/* Right: Scoreboard Sidebar - Desktop Only */}
+          <div className="hidden lg:flex lg:w-2/5 flex-col border-l border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+            {/* Sidebar Header */}
+            <div className="px-4 py-3 border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Trophy className="w-5 h-5 text-amber-500" />
+                  <span className="font-bold text-gray-900 dark:text-gray-100">Scoreboard</span>
+                </div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  {holesScored} of {holeCount} holes
+                </div>
+              </div>
+            </div>
+            
+            {/* Sidebar Scoreboard Table */}
+            <div className="flex-1 overflow-auto p-4">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="sticky top-0 bg-white dark:bg-slate-800">
+                    <tr className="border-b border-gray-200 dark:border-slate-700">
+                      <th className="text-left py-2 px-2 font-semibold text-gray-600 dark:text-gray-400">Player</th>
+                      {Array.from({ length: holeCount }, (_, i) => (
+                        <th 
+                          key={i} 
+                          className={`text-center py-2 px-1 font-semibold min-w-[24px]
+                            ${i + 1 === currentHole ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 rounded' : 'text-gray-600 dark:text-gray-400'}
+                          `}
+                        >
+                          {i + 1}
+                        </th>
+                      ))}
+                      <th className="text-center py-2 px-2 font-bold text-gray-900 dark:text-gray-100">Tot</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {activeScorecard.members.map((member, idx) => (
+                      <tr key={member.PlayerID} className="border-b border-gray-100 dark:border-slate-700/50 hover:bg-gray-50 dark:hover:bg-slate-700/30 transition-colors">
+                        <td className="py-2.5 px-2">
+                          <div className="flex items-center gap-2">
+                            <div className={`w-6 h-6 rounded-full bg-gradient-to-br ${PLAYER_COLORS[idx % PLAYER_COLORS.length]} 
+                                          flex items-center justify-center text-white text-xs font-bold shrink-0`}>
+                              {member.FirstName.charAt(0)}
+                            </div>
+                            <span className="font-medium text-gray-900 dark:text-gray-100 truncate max-w-[70px]">
+                              {member.FirstName}
+                            </span>
+                          </div>
+                        </td>
+                        {Array.from({ length: holeCount }, (_, i) => {
+                          const score = activeScorecard.scores.find(
+                            s => s.PlayerID === member.PlayerID && s.HoleNumber === i + 1
+                          );
+                          const isCurrent = i + 1 === currentHole;
+                          return (
+                            <td 
+                              key={i} 
+                              className={`text-center py-2.5 px-1 ${isCurrent ? 'bg-emerald-50 dark:bg-emerald-900/20' : ''}`}
+                            >
+                              <span className={`
+                                ${score 
+                                  ? score.Strokes === 3 
+                                    ? 'font-bold text-amber-600 dark:text-amber-400' 
+                                    : 'font-semibold text-gray-900 dark:text-gray-100' 
+                                  : 'text-gray-300 dark:text-gray-600'
+                                }
+                              `}>
+                                {score ? score.Strokes : '–'}
+                              </span>
+                            </td>
+                          );
+                        })}
+                        <td className="text-center py-2.5 px-2 font-bold text-emerald-600 dark:text-emerald-400 text-base">
+                          {getPlayerTotalScore(member.PlayerID)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Collapsible Scoreboard */}
-        <div className="bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 shadow-lg">
+        {/* Collapsible Scoreboard - Mobile Only */}
+        <div className="lg:hidden bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 shadow-lg">
           <button
             onClick={() => setShowScoreboard(!showScoreboard)}
             className="w-full px-4 py-3 flex items-center justify-between"
